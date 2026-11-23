@@ -16,7 +16,9 @@
     "format:docs": "prettier --write \"**/*.md\"",
     "typecheck": "pnpm -r --if-present typecheck",
     "prepare": "husky",
-    "test:routes": "node scripts/validate-routes.mjs"
+    "test:routes": "node scripts/validate-routes.mjs",
+    "test:demo": "node scripts/test-demo-mode.mjs",
+    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",

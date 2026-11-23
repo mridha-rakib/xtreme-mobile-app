@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@xtreme/design-tokens": "workspace:*",
+    "@xtreme/mock-data": "workspace:*",
     "@xtreme/types": "workspace:*"
   },
   "peerDependencies": {

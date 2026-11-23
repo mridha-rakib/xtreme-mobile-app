@@ -49,3 +49,20 @@ export interface PasswordResetRequest {
   method: 'phone' | 'email';
   destination: string;
 }
+
+export type DemoPersona = 'customer' | 'driver' | 'operations';
+
+export type DemoScenario = 'success' | 'failure' | 'pending' | 'cancelled';
+
+export interface DemoState {
+  isDemoMode: boolean;
+  activePersona: DemoPersona;
+  scenario: DemoScenario;
+  selectedResourceIds: {
+    bookingId: string;
+    tripId: string;
+    serviceId: string;
+    conversationId: string;
+    assignmentId: string;
+  };
+}

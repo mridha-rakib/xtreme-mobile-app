@@ -44,6 +44,34 @@ export const sampleStaffUser: UserProfile = {
   createdAt: '2025-11-01T10:00:00Z',
 };
 
+export const sampleDriver: UserProfile = sampleStaffUser;
+
+export const sampleOperationsUser: UserProfile = {
+  id: 'demo-stf-ops-001',
+  role: 'operations',
+  firstName: 'Fatou',
+  lastName: 'Sall',
+  email: 'fatou.sall.ops@example.com',
+  phone: '+221 76 555 8899',
+  preferredLanguage: 'fr',
+  city: 'Dakar',
+  createdAt: '2025-10-15T08:00:00Z',
+};
+
+export const samplePersonas = {
+  customer: sampleCustomer,
+  driver: sampleDriver,
+  operations: sampleOperationsUser,
+} as const;
+
+export const DEFAULT_DEMO_IDS = {
+  bookingId: 'bkg-demo-001',
+  tripId: 'trip-demo-001',
+  serviceId: 'svc-airport-fasttrack',
+  conversationId: 'conv-demo-001',
+  assignmentId: 'demo-asg-001',
+} as const;
+
 export const sampleLocations: ServiceLocation[] = [
   { id: 'loc-dkr-aibd', city: 'Dakar', region: 'Diass', country: 'Senegal', airportCode: 'DSS' },
   { id: 'loc-dkr-alm', city: 'Dakar', region: 'Almadies', country: 'Senegal' },

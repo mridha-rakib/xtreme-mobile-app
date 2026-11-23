@@ -1,5 +1,18 @@
 import { colors, palette, radii, shadows, spacing, typography } from '@xtreme/design-tokens';
-import type { AssignmentStatus, BookingStatus, UserProfile } from '@xtreme/types';
+import {
+  DEFAULT_DEMO_IDS,
+  sampleCustomer,
+  sampleDriver,
+  sampleOperationsUser,
+  samplePersonas,
+} from '@xtreme/mock-data';
+import type {
+  AssignmentStatus,
+  BookingStatus,
+  DemoPersona,
+  DemoScenario,
+  UserProfile,
+} from '@xtreme/types';
 import { StatusBar } from 'expo-status-bar';
 import { createContext, type PropsWithChildren, type ReactNode, useContext, useState } from 'react';
 import {
@@ -25,32 +38,83 @@ export { colors, palette, radii, shadows, spacing, typography };
 export interface MockAuthContextType {
   isAuthenticated: boolean;
   currentUser: UserProfile | null;
+  isDemoMode: boolean;
+  activePersona: DemoPersona;
+  scenario: DemoScenario;
+  demoResourceIds: typeof DEFAULT_DEMO_IDS;
   login: (user?: UserProfile) => void;
   logout: () => void;
+  setDemoMode: (enabled: boolean) => void;
+  selectPersona: (persona: DemoPersona) => void;
+  setScenario: (scenario: DemoScenario) => void;
+  resetDemoState: () => void;
 }
+
+const defaultDemoIds = DEFAULT_DEMO_IDS;
 
 const MockAuthContext = createContext<MockAuthContextType>({
   isAuthenticated: false,
   currentUser: null,
+  isDemoMode: typeof __DEV__ !== 'undefined' ? __DEV__ : false,
+  activePersona: 'customer',
+  scenario: 'success',
+  demoResourceIds: defaultDemoIds,
   login: () => {},
   logout: () => {},
+  setDemoMode: () => {},
+  selectPersona: () => {},
+  setScenario: () => {},
+  resetDemoState: () => {},
 });
 
 export function MockAuthProvider({
   children,
   initialUser = null,
   initialAuthenticated = false,
+  initialDemoMode = typeof __DEV__ !== 'undefined' ? __DEV__ : false,
 }: {
   children: ReactNode;
   initialUser?: UserProfile | null;
   initialAuthenticated?: boolean;
+  initialDemoMode?: boolean;
 }) {
+  const isDevBuild = typeof __DEV__ !== 'undefined' && __DEV__;
+  // Security rule: demo bypass can only exist in DEV/preview builds
+  const [isDemoMode, setIsDemoModeState] = useState(isDevBuild ? initialDemoMode : false);
   const [isAuthenticated, setIsAuthenticated] = useState(initialAuthenticated);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(initialUser);
+  const [activePersona, setActivePersona] = useState<DemoPersona>('customer');
+  const [scenario, setScenarioState] = useState<DemoScenario>('success');
+
+  const setDemoMode = (enabled: boolean) => {
+    if (isDevBuild) {
+      setIsDemoModeState(enabled);
+    }
+  };
+
+  const selectPersona = (persona: DemoPersona) => {
+    setActivePersona(persona);
+    if (persona === 'customer') {
+      setCurrentUser(sampleCustomer);
+    } else if (persona === 'driver') {
+      setCurrentUser(sampleDriver);
+    } else if (persona === 'operations') {
+      setCurrentUser(sampleOperationsUser);
+    }
+    setIsAuthenticated(true);
+  };
+
+  const setScenario = (newScenario: DemoScenario) => {
+    setScenarioState(newScenario);
+  };
 
   const login = (user?: UserProfile) => {
     setIsAuthenticated(true);
-    if (user) setCurrentUser(user);
+    if (user) {
+      setCurrentUser(user);
+    } else {
+      setCurrentUser(samplePersonas[activePersona] || sampleCustomer);
+    }
   };
 
   const logout = () => {
@@ -58,8 +122,33 @@ export function MockAuthProvider({
     setCurrentUser(null);
   };
 
+  const resetDemoState = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setActivePersona('customer');
+    setScenarioState('success');
+    if (isDevBuild) {
+      setIsDemoModeState(true);
+    }
+  };
+
   return (
-    <MockAuthContext.Provider value={{ isAuthenticated, currentUser, login, logout }}>
+    <MockAuthContext.Provider
+      value={{
+        isAuthenticated,
+        currentUser,
+        isDemoMode,
+        activePersona,
+        scenario,
+        demoResourceIds: DEFAULT_DEMO_IDS,
+        login,
+        logout,
+        setDemoMode,
+        selectPersona,
+        setScenario,
+        resetDemoState,
+      }}
+    >
       {children}
     </MockAuthContext.Provider>
   );
@@ -79,8 +168,8 @@ export function ProtectedRoute({
   children: ReactNode;
   onSignIn?: () => void;
 }) {
-  const { isAuthenticated } = useMockAuth();
-  if (!isAuthenticated) {
+  const { isAuthenticated, isDemoMode } = useMockAuth();
+  if (!isAuthenticated && !isDemoMode) {
     return (
       <View style={styles.protectedGate}>
         <Text style={styles.protectedTitle}>Authentication Required</Text>

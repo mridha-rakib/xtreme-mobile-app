@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "XTREME Staff",
+    "slug": "xtreme-staff-mobile",
+    "scheme": "xtreme-staff",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "ios": {
+      "bundleIdentifier": "com.xtremeconcierge.staff"
+    },
+    "android": {
+      "package": "com.xtremeconcierge.staff"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "xtreme-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "customer": "pnpm --filter @xtreme/customer-mobile start",
+    "staff": "pnpm --filter @xtreme/staff-mobile start",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:docs": "prettier --write \"**/*.md\"",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "prepare": "husky",
+    "test:routes": "node scripts/validate-routes.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
+    "prettier": "^3.6.0",
+    "typescript": "~5.9.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,jsonc}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.md": [
+      "prettier --write"
+    ]
+  }
+}

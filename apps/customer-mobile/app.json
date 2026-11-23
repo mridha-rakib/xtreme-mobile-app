@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "XTREME Customer",
+    "slug": "xtreme-customer-mobile",
+    "scheme": "xtreme-customer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "ios": {
+      "bundleIdentifier": "com.xtremeconcierge.customer"
+    },
+    "android": {
+      "package": "com.xtremeconcierge.customer"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

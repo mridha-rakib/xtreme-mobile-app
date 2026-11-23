@@ -302,7 +302,14 @@ export function StatusBadge({ status }: { status: BookingStatus | AssignmentStat
 }
 
 /**
- * BrandLogo Component - Faithfully replicates the approved Figma badge
+ * BrandLogo Component - Faithfully replicates the approved Figma badge.
+ *
+ * BRANDING SPECIFICATION COMPLIANCE NOTE:
+ * - The visual artwork in Figma is explicitly designated as a development placeholder
+ *   ('logo placeholder' in subtext per XTREME_Concierge_Design_Tokens_v1.0.json line 7).
+ * - This component represents the approved placeholder layout and must NOT be replaced
+ *   with an invented logo.
+ * - Final production vector branding will be integrated once officially delivered by the client.
  */
 export interface BrandLogoProps {
   variant?: 'customer' | 'staff';

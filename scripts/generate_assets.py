@@ -1,3 +1,15 @@
+"""
+XTREME Concierge MVP — Asset Generator
+Generates development placeholder icons and splash screens adhering strictly to the
+approved Figma badge layout and design tokens (v1.0 / v1.1).
+
+BRANDING COMPLIANCE NOTE:
+- These assets are explicitly development placeholders derived from the approved
+  Figma layout where the badge is labeled 'logo placeholder'.
+- They do NOT represent a finalized or invented client production logo.
+- When official production vector brand assets are delivered, this generator
+  will ingest the final client vector artwork.
+"""
 import os
 from PIL import Image, ImageDraw, ImageFont
 

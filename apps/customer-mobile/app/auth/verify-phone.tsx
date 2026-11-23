@@ -2,29 +2,29 @@ import { sampleCustomer } from '@xtreme/mock-data';
 import { DEFAULT_OTP_CONFIG } from '@xtreme/types';
 import {
   AuthHeader,
+  AuthScreenContainer,
   BrandLogo,
   InputField,
   LegalFooter,
   NoticeBanner,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
   useMockAuth,
 } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 /**
  * CUS-AUTH-03 — Phone OTP Verification
  * Visual fidelity matched to approved Figma frame (CUS-AUTH-03.svg)
  *
  * SPECIFICATION & ACCEPTANCE COMPLIANCE:
- * - Unconditional prefilled OTP removed from normal user experience.
- * - OTP code is empty by default; user must input their code.
- * - Explicit development mechanism provides simulated test OTP.
- * - Contract-compliant OTP validation adhering to DEFAULT_OTP_CONFIG (no invented rules).
- * - Simulated resend action with dynamic status notice banner.
+ * - Unconditional prefilled OTP removed from standard user flow.
+ * - OTP code empty by default; adheres to DEFAULT_OTP_CONFIG bounds.
+ * - Verification state notice banner with Atlantic tint (#DDEBEC).
+ * - Cross-platform Safe Area & keyboard avoidance.
+ * - Gated QA dev button behind __DEV__.
  */
 export default function VerifyPhoneScreen() {
   const router = useRouter();
@@ -39,12 +39,10 @@ export default function VerifyPhoneScreen() {
   const [error, setError] = useState<string | undefined>();
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Flexible OTP length check conforming to canonical contract
   const isLengthValid =
     otpCode.length >= DEFAULT_OTP_CONFIG.minLength &&
     otpCode.length <= DEFAULT_OTP_CONFIG.maxLength;
 
-  // Explicit development mechanism for testing
   const handleFillDemo = () => {
     if (!phone) setPhone('+221 77 123 4567');
     setOtpCode('123456');
@@ -84,113 +82,91 @@ export default function VerifyPhoneScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Phone Verification" subtitle="Verify your registered mobile number" />
+    <AuthScreenContainer>
+      <AuthHeader title="Phone Verification" subtitle="Verify your registered mobile number" />
 
-        <View style={styles.badgeWrapper}>
-          <BrandLogo variant="customer" />
-        </View>
+      <View style={styles.badgeWrapper}>
+        <BrandLogo variant="customer" />
+      </View>
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Phone"
-            placeholder="Registered mobile number"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-          />
-
-          <InputField
-            label="OTP code"
-            placeholder="Verification code"
-            value={otpCode}
-            onChangeText={(text) => {
-              setOtpCode(text);
-              if (error) setError(undefined);
-            }}
-            keyboardType="numeric"
-            error={error}
-          />
-
-          <PrimaryButton
-            label="Verify OTP"
-            onPress={handleVerify}
-            loading={isVerifying}
-            disabled={!isLengthValid}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.resendWrapper}>
-            <TextLink label="Resend / request OTP" onPress={handleResend} />
-          </View>
-
-          <NoticeBanner
-            title="Verification state"
-            message={bannerMessage}
-            style={styles.noticeBanner}
-          />
-
-          {/* Explicit Development Mechanism (Gated behind __DEV__) */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Test OTP (123456)</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+      <View style={styles.formContainer}>
+        <InputField
+          label="Phone"
+          placeholder="Registered mobile number"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
         />
-      </ScrollView>
-    </View>
+
+        <InputField
+          label="OTP code"
+          placeholder="Verification code"
+          value={otpCode}
+          onChangeText={(text) => {
+            setOtpCode(text);
+            if (error) setError(undefined);
+          }}
+          keyboardType="numeric"
+          error={error}
+        />
+
+        <PrimaryButton
+          label="Verify OTP"
+          onPress={handleVerify}
+          loading={isVerifying}
+          disabled={!isLengthValid}
+          style={styles.submitBtn}
+        />
+
+        <View style={styles.resendWrapper}>
+          <TextLink label="Resend / request OTP" onPress={handleResend} />
+        </View>
+
+        <NoticeBanner
+          title="Verification state"
+          message={bannerMessage}
+          style={styles.noticeBanner}
+        />
+
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Test OTP (123456)</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   badgeWrapper: {
-    marginVertical: 14,
+    marginTop: 10,
+    marginBottom: 20,
     alignItems: 'center',
   },
   formContainer: {
-    marginTop: 6,
+    marginTop: 4,
   },
   submitBtn: {
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 14,
+    marginBottom: 10,
   },
   resendWrapper: {
-    marginTop: 4,
-    marginBottom: 8,
+    alignItems: 'center',
   },
   noticeBanner: {
-    marginTop: 16,
+    marginTop: 18,
   },
   devContainer: {
     marginTop: 16,

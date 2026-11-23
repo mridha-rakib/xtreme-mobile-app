@@ -25,9 +25,10 @@ export const DESIGN_SYSTEM_V1_TOKENS = {
   accent_champagne: '#C6A15B',
   accent_champagneDark: '#A88343',
   accent_champagneTint: '#F1E7D2',
+  accent_champagnePlaceholder: '#D7C39A', // Exact color stop from Figma SVG for placeholder subtitle
   accent_atlantic: '#164D53',
   accent_atlanticMid: '#1F626A',
-  accent_atlanticTint: '#DDEBEC',
+  accent_atlanticTint: '#DDEBEC', // Exact color stop from Figma SVG for verification/context cards
 
   // Semantics
   semantic_success: '#1F6B4A',
@@ -47,6 +48,7 @@ export const DESIGN_SYSTEM_V1_TOKENS = {
   surface_accent: '#F1E7D2',
   text_primary: '#0B0C0E',
   text_secondary: '#5B616B',
+  text_placeholder: '#A6A19A',
   text_inverse: '#FFFFFF',
   text_link: '#164D53',
   border_default: '#DDD8CF',

@@ -1,16 +1,16 @@
 import {
   AuthHeader,
+  AuthScreenContainer,
   BrandLogo,
   InputField,
   LegalFooter,
   NeutralSecurityNotice,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -61,88 +61,68 @@ export default function ResetEmailScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar onBack={() => router.back()} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Reset by Email" subtitle="Request a secure reset link" />
+    <AuthScreenContainer>
+      <AuthHeader title="Reset by Email" subtitle="Request a secure reset link" />
 
-        <View style={styles.badgeWrapper}>
-          <BrandLogo variant="customer" />
-        </View>
+      <View style={styles.badgeWrapper}>
+        <BrandLogo variant="customer" />
+      </View>
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Registered email"
-            placeholder="Email address"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              if (error) setError(undefined);
-            }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={error}
-          />
-
-          <PrimaryButton
-            label="Send reset link"
-            onPress={handleSendLink}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink label="Back" onPress={() => router.back()} />
-          </View>
-
-          {/* Non-disclosure security notice matching Figma CUS-AUTH-07 */}
-          <NeutralSecurityNotice
-            title="Neutral request result"
-            description="The response does not confirm whether an account exists."
-          />
-
-          {/* Development autofill gated behind __DEV__ */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Test Email</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+      <View style={styles.formContainer}>
+        <InputField
+          label="Registered email"
+          placeholder="Email address"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (error) setError(undefined);
+          }}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={error}
         />
-      </ScrollView>
-    </View>
+
+        <PrimaryButton
+          label="Send reset link"
+          onPress={handleSendLink}
+          loading={isLoading}
+          style={styles.submitBtn}
+        />
+
+        <View style={styles.linksContainer}>
+          <TextLink label="Back" onPress={() => router.back()} />
+        </View>
+
+        {/* Non-disclosure security notice matching Figma CUS-AUTH-07 */}
+        <NeutralSecurityNotice
+          title="Neutral request result"
+          description="The response does not confirm whether an account exists."
+          style={styles.noticeSpacing}
+        />
+
+        {/* Development autofill gated behind __DEV__ */}
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Test Email</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   badgeWrapper: {
     marginVertical: 14,
     alignItems: 'center',
@@ -157,6 +137,9 @@ const styles = StyleSheet.create({
   linksContainer: {
     marginTop: 6,
     alignItems: 'center',
+  },
+  noticeSpacing: {
+    marginTop: 14,
   },
   devContainer: {
     marginTop: 12,

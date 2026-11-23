@@ -1,15 +1,15 @@
 import {
   AuthHeader,
+  AuthScreenContainer,
   ContextBanner,
   LegalFooter,
   PasswordInput,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 /**
  * CUS-AUTH-08 — Email Reset Confirmation (Set New Password)
@@ -19,6 +19,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
  * - Secure context card indicating reset token is handled safely in background.
  * - Password input with visibility toggle enforcing minimum 8 characters.
  * - Simulated reset completion transitions to sign-in.
+ * - Note: No BrandLogo badge in Figma frame; ContextBanner provides top context.
  */
 export default function ResetEmailConfirmScreen() {
   const router = useRouter();
@@ -54,87 +55,71 @@ export default function ResetEmailConfirmScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar onBack={() => router.back()} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Set New Password" subtitle="Secure email reset link" />
+    <AuthScreenContainer>
+      <AuthHeader title="Set New Password" subtitle="Secure email reset link" />
 
-        {/* Secure context card matching Figma CUS-AUTH-08 */}
-        <ContextBanner
-          title="Secure reset context"
-          description="The reset token is handled securely and is not displayed."
+      {/* Secure context card matching Figma CUS-AUTH-08 */}
+      <ContextBanner
+        title="Secure reset context"
+        description="The reset token is handled securely and is not displayed."
+        style={styles.bannerSpacing}
+      />
+
+      <View style={styles.formContainer}>
+        <PasswordInput
+          label="New password"
+          placeholder="Minimum 8 characters"
+          value={newPassword}
+          onChangeText={(text) => {
+            setNewPassword(text);
+            if (error) setError(undefined);
+          }}
+          error={error}
         />
 
-        <View style={styles.formContainer}>
-          <PasswordInput
-            label="New password"
-            placeholder="Minimum 8 characters"
-            value={newPassword}
-            onChangeText={(text) => {
-              setNewPassword(text);
-              if (error) setError(undefined);
-            }}
-            error={error}
+        <PrimaryButton
+          label="Reset password"
+          onPress={handleResetPassword}
+          loading={isLoading}
+          style={styles.submitBtn}
+        />
+
+        <View style={styles.linksContainer}>
+          <TextLink
+            label="Return to sign in"
+            onPress={() => router.push('/auth/sign-in' as never)}
           />
-
-          <PrimaryButton
-            label="Reset password"
-            onPress={handleResetPassword}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink
-              label="Return to sign in"
-              onPress={() => router.push('/auth/sign-in' as never)}
-            />
-          </View>
-
-          {/* Development autofill gated behind __DEV__ */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill New Password</Text>
-              </Pressable>
-            </View>
-          ) : null}
         </View>
 
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
-        />
-      </ScrollView>
-    </View>
+        {/* Development autofill gated behind __DEV__ */}
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill New Password</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
+  bannerSpacing: {
+    marginTop: 14,
+    marginBottom: 8,
   },
   formContainer: {
-    marginTop: 8,
+    marginTop: 6,
   },
   submitBtn: {
     marginTop: 12,

@@ -3,6 +3,8 @@ import type { AssignmentStatus, BookingStatus, UserProfile } from '@xtreme/types
 import { StatusBar } from 'expo-status-bar';
 import { createContext, type PropsWithChildren, type ReactNode, useContext, useState } from 'react';
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -335,39 +337,95 @@ export function BrandLogo({ variant = 'customer', style }: BrandLogoProps) {
  *
  * SPECIFICATION COMPLIANCE:
  * - Hardcoded '9:41' mockup text removed in favor of native device status bar.
- * - Respects physical safe area insets (notches, Dynamic Island, status bar heights).
- * - Ensures dark status bar text and icons against the Ivory Sand canvas.
+ * - Accurately aligns centered XTREME brand header matching Figma y=29.
+ * - Divider line matching Figma line (18,44) -> (372,44).
  */
 export function ScreenTopBar({
   brand = 'XTREME',
   showDivider = true,
-  onBack,
+  onBack: _onBack,
 }: {
   brand?: string;
   showDivider?: boolean;
   onBack?: () => void;
 }) {
-  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.screenTopBar, { paddingTop: Math.max(insets.top, 8) }]}>
+    <View style={styles.screenTopBar}>
       <StatusBar style="dark" />
       <View style={styles.screenTopBarRow}>
-        {onBack ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={onBack}
-            hitSlop={8}
-            style={styles.topBarBack}
-          >
-            <Text style={styles.topBarBackText}>← Back</Text>
-          </Pressable>
-        ) : (
-          <View style={{ width: 44 }} />
-        )}
         <Text style={styles.screenBrandText}>{brand}</Text>
-        <View style={{ width: 44 }} />
       </View>
       {showDivider ? <View style={styles.screenTopDivider} /> : null}
+    </View>
+  );
+}
+
+/**
+ * AuthScreenContainer - Complete cross-platform Safe Area & Keyboard Avoiding Wrapper
+ *
+ * SAFE AREA ARCHITECTURE:
+ * - Applies exact insets.top to avoid camera notch/Dynamic Island without double-padding.
+ * - Centers the XTREME brand header and status divider.
+ * - Integrates KeyboardAvoidingView (iOS padding) and keyboardShouldPersistTaps.
+ * - Enforces insets.bottom padding so footer/legal text floats above home indicators.
+ */
+export interface AuthScreenContainerProps {
+  children: ReactNode;
+  brand?: string;
+  showDivider?: boolean;
+  contentContainerStyle?: ViewStyle;
+}
+
+export function AuthScreenContainer({
+  children,
+  brand = 'XTREME',
+  showDivider = true,
+  contentContainerStyle,
+}: AuthScreenContainerProps) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={[styles.authScreenRoot, { paddingTop: insets.top }]}>
+      <StatusBar style="dark" />
+      <View style={styles.screenTopBarRow}>
+        <Text style={styles.screenBrandText}>{brand}</Text>
+      </View>
+      {showDivider ? <View style={styles.screenTopDivider} /> : null}
+
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          style={styles.authScrollView}
+          contentContainerStyle={[
+            styles.authScrollContent,
+            contentContainerStyle,
+            { paddingBottom: Math.max(insets.bottom, 24) },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+
+/**
+ * EyeIcon - Vector Concentric Circles matching Figma Password Visibility Toggle
+ * Exactly replicates:
+ * <circle cx="344" cy="293" r="7" fill="none" stroke="#A6A19A" />
+ * <circle cx="344" cy="293" r="2" fill="#A6A19A" stroke="none" />
+ */
+export function EyeIcon({ visible }: { visible: boolean }) {
+  return (
+    <View style={styles.eyeIconContainer}>
+      <View style={styles.eyeOuterCircle}>
+        <View style={styles.eyeInnerPupil} />
+        {!visible ? <View style={styles.eyeSlashLine} /> : null}
+      </View>
     </View>
   );
 }
@@ -569,9 +627,9 @@ export function PasswordInput({
         <Pressable
           accessibilityRole="button"
           onPress={() => setVisible((prev) => !prev)}
-          hitSlop={8}
+          hitSlop={12}
         >
-          <Text style={styles.toggleVisibilityText}>{visible ? 'Hide' : 'Show'}</Text>
+          <EyeIcon visible={visible} />
         </Pressable>
       }
     />
@@ -1092,12 +1150,12 @@ const styles = StyleSheet.create({
     color: '#F1E7D2',
   },
   screenTopBar: {
-    paddingTop: 12,
-    paddingBottom: 4,
+    backgroundColor: '#FAF8F4',
   },
   screenTopBarRow: {
+    height: 36,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 22,
   },
@@ -1115,7 +1173,6 @@ const styles = StyleSheet.create({
   screenTopDivider: {
     height: 1,
     backgroundColor: '#DDD8CF',
-    marginTop: 10,
   },
   authHeaderContainer: {
     marginTop: 16,
@@ -1374,5 +1431,53 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#5B616B',
     lineHeight: 15,
+  },
+  // Phase 2.2 Fidelity & Cross-Platform Safe Area Styles
+  authScreenRoot: {
+    flex: 1,
+    backgroundColor: '#FAF8F4',
+  },
+  authTopBrandBar: {
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  keyboardAvoidContainer: {
+    flex: 1,
+  },
+  authScrollView: {
+    flex: 1,
+  },
+  authScrollContent: {
+    paddingHorizontal: 22,
+    paddingTop: 12,
+  },
+  eyeIconContainer: {
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eyeOuterCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.4,
+    borderColor: '#A6A19A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eyeInnerPupil: {
+    width: 4.5,
+    height: 4.5,
+    borderRadius: 2.25,
+    backgroundColor: '#A6A19A',
+  },
+  eyeSlashLine: {
+    position: 'absolute',
+    width: 18,
+    height: 1.4,
+    backgroundColor: '#A6A19A',
+    transform: [{ rotate: '45deg' }],
   },
 });

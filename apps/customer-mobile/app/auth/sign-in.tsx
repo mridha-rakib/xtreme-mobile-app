@@ -1,18 +1,18 @@
 import { sampleCustomer } from '@xtreme/mock-data';
 import {
   AuthHeader,
+  AuthScreenContainer,
   BrandLogo,
   InputField,
   LegalFooter,
   PasswordInput,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
   useMockAuth,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 /**
  * CUS-AUTH-01 — Sign In
@@ -20,9 +20,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
  *
  * SPECIFICATION & ACCEPTANCE COMPLIANCE:
  * - Empty fields by default in standard user flow (no unconditional prefill).
- * - Explicit development mechanism for testing ("Dev: Fill Demo Account").
- * - Frontend validation for non-empty identifier and password.
- * - Clear separation of simulated mock session from live production auth.
+ * - Exact vertical hierarchy matching Figma frame (390x844 geometry).
+ * - Cross-platform Safe Area & keyboard avoidance via AuthScreenContainer.
+ * - Eye icon vector concentric circles toggle for password.
+ * - Gated QA dev button behind __DEV__.
  */
 export default function SignInScreen() {
   const router = useRouter();
@@ -34,7 +35,6 @@ export default function SignInScreen() {
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Explicit development mechanism for quick test access
   const handleFillDemo = () => {
     setIdentifier('+221 77 123 4567');
     setPassword('demo-concierge');
@@ -64,7 +64,6 @@ export default function SignInScreen() {
 
     setIsLoading(true);
 
-    // Mock authentication transition without live network calls
     setTimeout(() => {
       setIsLoading(false);
       login(sampleCustomer);
@@ -73,117 +72,93 @@ export default function SignInScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Sign In" subtitle="Customer App" />
+    <AuthScreenContainer>
+      <AuthHeader title="Sign In" subtitle="Customer App" />
 
-        <View style={styles.badgeWrapper}>
-          <BrandLogo variant="customer" />
-        </View>
+      <View style={styles.badgeWrapper}>
+        <BrandLogo variant="customer" />
+      </View>
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Identifier"
-            placeholder="Registered email or mobile number"
-            value={identifier}
-            onChangeText={(text) => {
-              setIdentifier(text);
-              if (identifierError) setIdentifierError(undefined);
-            }}
-            keyboardType="default"
-            autoCapitalize="none"
-            error={identifierError}
-          />
-
-          <PasswordInput
-            label="Password"
-            placeholder="••••••••"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (passwordError) setPasswordError(undefined);
-            }}
-            error={passwordError}
-          />
-
-          <PrimaryButton
-            label="Sign in"
-            onPress={handleSignIn}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink
-              label="Create account"
-              onPress={() => router.push('/auth/register' as never)}
-            />
-            <TextLink
-              label="Forgot password"
-              onPress={() => router.push('/auth/forgot-password' as never)}
-            />
-          </View>
-
-          {/* Explicit Development Mechanism (Gated behind __DEV__) */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Demo Account</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+      <View style={styles.formContainer}>
+        <InputField
+          label="Identifier"
+          placeholder="Registered email or mobile number"
+          value={identifier}
+          onChangeText={(text) => {
+            setIdentifier(text);
+            if (identifierError) setIdentifierError(undefined);
+          }}
+          keyboardType="default"
+          autoCapitalize="none"
+          error={identifierError}
         />
-      </ScrollView>
-    </View>
+
+        <PasswordInput
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (passwordError) setPasswordError(undefined);
+          }}
+          error={passwordError}
+        />
+
+        <PrimaryButton
+          label="Sign in"
+          onPress={handleSignIn}
+          loading={isLoading}
+          style={styles.submitBtn}
+        />
+
+        <View style={styles.linksContainer}>
+          <TextLink label="Create account" onPress={() => router.push('/auth/register' as never)} />
+          <TextLink
+            label="Forgot password"
+            onPress={() => router.push('/auth/forgot-password' as never)}
+          />
+        </View>
+
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Demo Account</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   badgeWrapper: {
-    marginVertical: 14,
+    marginTop: 10,
+    marginBottom: 20,
     alignItems: 'center',
   },
   formContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   submitBtn: {
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 14,
+    marginBottom: 12,
   },
   linksContainer: {
-    marginTop: 8,
-    gap: 4,
+    gap: 6,
+    alignItems: 'center',
   },
   devContainer: {
-    marginTop: 16,
+    marginTop: 18,
     alignItems: 'center',
   },
   devButton: {

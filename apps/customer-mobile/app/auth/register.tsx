@@ -1,17 +1,16 @@
 import {
   AuthHeader,
+  AuthScreenContainer,
   InputField,
   LegalFooter,
   PasswordInput,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-// Restricted to approved specification languages: English and French (fr/en)
 const APPROVED_LANGUAGES = [
   { label: 'English', code: 'en' as const },
   { label: 'Français', code: 'fr' as const },
@@ -25,11 +24,10 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Visual fidelity matched to approved Figma frame (CUS-AUTH-02.svg)
  *
  * SPECIFICATION & ACCEPTANCE COMPLIANCE:
- * - Selectable languages strictly limited to approved English and French.
- * - Frontend validation for all required fields against SRS/OpenAPI contract.
- * - E.164 phone format and valid email format enforcement.
- * - Minimum 8-character password constraint matching UI specification.
- * - Discrete development helper for QA testing without compromising normal flow.
+ * - Direct transition from header into fields (no badge per Figma spec).
+ * - Language selection limited strictly to English and French.
+ * - Cross-platform Safe Area & keyboard avoidance.
+ * - Gated QA dev button behind __DEV__.
  */
 export default function RegisterScreen() {
   const router = useRouter();
@@ -48,7 +46,6 @@ export default function RegisterScreen() {
     setLanguageIndex((prev) => (prev + 1) % APPROVED_LANGUAGES.length);
   };
 
-  // Explicit development mechanism
   const handleFillDemo = () => {
     setPhone('+221 77 123 4567');
     setEmail('amadou.diallo@example.sn');
@@ -98,7 +95,6 @@ export default function RegisterScreen() {
 
     setTimeout(() => {
       setIsLoading(false);
-      // Navigate to phone verification per approved user flow
       router.push({
         pathname: '/auth/verify-phone',
         params: { phone: phone.trim() },
@@ -107,141 +103,120 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Create Account" subtitle="Customer registration" />
+    <AuthScreenContainer>
+      <AuthHeader title="Create Account" subtitle="Customer registration" />
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Phone"
-            placeholder="E.164 mobile number"
-            value={phone}
-            onChangeText={(text) => {
-              setPhone(text);
-              if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
-            }}
-            keyboardType="phone-pad"
-            error={errors.phone}
-          />
+      <View style={styles.formContainer}>
+        <InputField
+          label="Phone"
+          placeholder="E.164 mobile number"
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+          }}
+          keyboardType="phone-pad"
+          error={errors.phone}
+        />
 
-          <InputField
-            label="Email (optional)"
-            placeholder="Email address"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
-            }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={errors.email}
-          />
+        <InputField
+          label="Email (optional)"
+          placeholder="Email address"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+          }}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={errors.email}
+        />
 
-          <PasswordInput
-            label="Password"
-            placeholder="Minimum 8 characters"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
-            }}
-            error={errors.password}
-          />
+        <PasswordInput
+          label="Password"
+          placeholder="Minimum 8 characters"
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+          }}
+          error={errors.password}
+        />
 
-          <InputField
-            label="First name"
-            placeholder="First name"
-            value={firstName}
-            onChangeText={(text) => {
-              setFirstName(text);
-              if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: '' }));
-            }}
-            autoCapitalize="words"
-            error={errors.firstName}
-          />
+        <InputField
+          label="First name"
+          placeholder="First name"
+          value={firstName}
+          onChangeText={(text) => {
+            setFirstName(text);
+            if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: '' }));
+          }}
+          autoCapitalize="words"
+          error={errors.firstName}
+        />
 
-          <InputField
-            label="Last name"
-            placeholder="Last name"
-            value={lastName}
-            onChangeText={(text) => {
-              setLastName(text);
-              if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: '' }));
-            }}
-            autoCapitalize="words"
-            error={errors.lastName}
-          />
+        <InputField
+          label="Last name"
+          placeholder="Last name"
+          value={lastName}
+          onChangeText={(text) => {
+            setLastName(text);
+            if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: '' }));
+          }}
+          autoCapitalize="words"
+          error={errors.lastName}
+        />
 
-          <View style={styles.languageGroup}>
-            <Text style={styles.languageLabel}>Preferred language</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={cycleLanguage}
-              style={styles.languageSelector}
-            >
-              <Text style={styles.languageValue}>{APPROVED_LANGUAGES[languageIndex].label}</Text>
-              <Text style={styles.languageChevron}>⌄</Text>
-            </Pressable>
-          </View>
-
-          <PrimaryButton
-            label="Create account"
-            onPress={handleRegister}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink
-              label="Return to sign in"
-              onPress={() => router.push('/auth/sign-in' as never)}
-            />
-          </View>
-
-          {/* Explicit Development Mechanism (Gated behind __DEV__) */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Test Registration</Text>
-              </Pressable>
-            </View>
-          ) : null}
+        <View style={styles.languageGroup}>
+          <Text style={styles.languageLabel}>Preferred language</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={cycleLanguage}
+            style={styles.languageSelector}
+          >
+            <Text style={styles.languageValue}>{APPROVED_LANGUAGES[languageIndex].label}</Text>
+            <Text style={styles.languageChevron}>⌄</Text>
+          </Pressable>
         </View>
 
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+        <PrimaryButton
+          label="Create account"
+          onPress={handleRegister}
+          loading={isLoading}
+          style={styles.submitBtn}
         />
-      </ScrollView>
-    </View>
+
+        <View style={styles.linksContainer}>
+          <TextLink
+            label="Return to sign in"
+            onPress={() => router.push('/auth/sign-in' as never)}
+          />
+        </View>
+
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Test Registration</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-  },
   formContainer: {
-    marginTop: 4,
+    marginTop: 6,
   },
   languageGroup: {
     marginBottom: 14,
@@ -258,7 +233,7 @@ const styles = StyleSheet.create({
     borderColor: '#DDD8CF',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -274,11 +249,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   submitBtn: {
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 14,
+    marginBottom: 12,
   },
   linksContainer: {
-    marginTop: 6,
+    alignItems: 'center',
   },
   devContainer: {
     marginTop: 16,

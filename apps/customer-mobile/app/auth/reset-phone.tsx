@@ -1,16 +1,16 @@
 import {
   AuthHeader,
+  AuthScreenContainer,
   BrandLogo,
   InputField,
   LegalFooter,
   NeutralSecurityNotice,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const E164_PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
 
@@ -61,87 +61,67 @@ export default function ResetPhoneScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar onBack={() => router.back()} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Reset by Phone" subtitle="Request a password-reset OTP" />
+    <AuthScreenContainer>
+      <AuthHeader title="Reset by Phone" subtitle="Request a password-reset OTP" />
 
-        <View style={styles.badgeWrapper}>
-          <BrandLogo variant="customer" />
-        </View>
+      <View style={styles.badgeWrapper}>
+        <BrandLogo variant="customer" />
+      </View>
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Registered phone"
-            placeholder="E.164 mobile number"
-            value={phone}
-            onChangeText={(text) => {
-              setPhone(text);
-              if (error) setError(undefined);
-            }}
-            keyboardType="phone-pad"
-            error={error}
-          />
-
-          <PrimaryButton
-            label="Send reset OTP"
-            onPress={handleSendOtp}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink label="Back" onPress={() => router.back()} />
-          </View>
-
-          {/* Non-disclosure security notice matching Figma CUS-AUTH-05 */}
-          <NeutralSecurityNotice
-            title="Neutral request result"
-            description="The response does not confirm whether an account exists."
-          />
-
-          {/* Development autofill gated behind __DEV__ */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Test Phone</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+      <View style={styles.formContainer}>
+        <InputField
+          label="Registered phone"
+          placeholder="E.164 mobile number"
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            if (error) setError(undefined);
+          }}
+          keyboardType="phone-pad"
+          error={error}
         />
-      </ScrollView>
-    </View>
+
+        <PrimaryButton
+          label="Send reset OTP"
+          onPress={handleSendOtp}
+          loading={isLoading}
+          style={styles.submitBtn}
+        />
+
+        <View style={styles.linksContainer}>
+          <TextLink label="Back" onPress={() => router.back()} />
+        </View>
+
+        {/* Non-disclosure security notice matching Figma CUS-AUTH-05 */}
+        <NeutralSecurityNotice
+          title="Neutral request result"
+          description="The response does not confirm whether an account exists."
+          style={styles.noticeSpacing}
+        />
+
+        {/* Development autofill gated behind __DEV__ */}
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Test Phone</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   badgeWrapper: {
     marginVertical: 14,
     alignItems: 'center',
@@ -156,6 +136,9 @@ const styles = StyleSheet.create({
   linksContainer: {
     marginTop: 6,
     alignItems: 'center',
+  },
+  noticeSpacing: {
+    marginTop: 14,
   },
   devContainer: {
     marginTop: 12,

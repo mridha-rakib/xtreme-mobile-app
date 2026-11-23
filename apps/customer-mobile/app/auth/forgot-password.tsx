@@ -1,13 +1,13 @@
 import {
   AuthHeader,
+  AuthScreenContainer,
   BrandLogo,
   LegalFooter,
   RecoveryMethodCard,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * CUS-AUTH-04 — Forgot Password Method
@@ -22,68 +22,45 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar onBack={() => router.back()} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader title="Forgot Password" subtitle="Choose an approved recovery method" />
+    <AuthScreenContainer>
+      <AuthHeader title="Forgot Password" subtitle="Choose an approved recovery method" />
 
-        <View style={styles.badgeWrapper}>
-          <BrandLogo variant="customer" />
-        </View>
+      <View style={styles.badgeWrapper}>
+        <BrandLogo variant="customer" />
+      </View>
 
-        <View style={styles.methodsContainer}>
-          <RecoveryMethodCard
-            badgeLetter="P"
-            badgeColor="#A88343"
-            title="Phone OTP"
-            description="Recover using the registered mobile number."
-            onPress={() => router.push('/auth/reset-phone' as never)}
-          />
-
-          <RecoveryMethodCard
-            badgeLetter="E"
-            badgeColor="#164D53"
-            title="Email reset link"
-            description="Recover through the registered email address."
-            onPress={() => router.push('/auth/reset-email' as never)}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink
-              label="Back to sign in"
-              onPress={() => router.push('/auth/sign-in' as never)}
-            />
-          </View>
-        </View>
-
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
+      <View style={styles.methodsContainer}>
+        <RecoveryMethodCard
+          badgeLetter="P"
+          badgeColor="#A88343"
+          title="Phone OTP"
+          description="Recover using the registered mobile number."
+          onPress={() => router.push('/auth/reset-phone' as never)}
         />
-      </ScrollView>
-    </View>
+
+        <RecoveryMethodCard
+          badgeLetter="E"
+          badgeColor="#164D53"
+          title="Email reset link"
+          description="Recover through the registered email address."
+          onPress={() => router.push('/auth/reset-email' as never)}
+          style={styles.secondCard}
+        />
+
+        <View style={styles.linksContainer}>
+          <TextLink label="Back to sign in" onPress={() => router.push('/auth/sign-in' as never)} />
+        </View>
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   badgeWrapper: {
     marginVertical: 14,
     alignItems: 'center',
@@ -91,8 +68,11 @@ const styles = StyleSheet.create({
   methodsContainer: {
     marginTop: 8,
   },
+  secondCard: {
+    marginTop: 10,
+  },
   linksContainer: {
-    marginTop: 12,
+    marginTop: 14,
     alignItems: 'center',
   },
 });

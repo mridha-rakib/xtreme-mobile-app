@@ -1,16 +1,16 @@
 import { DEFAULT_OTP_CONFIG } from '@xtreme/types';
 import {
   AuthHeader,
+  AuthScreenContainer,
   InputField,
   LegalFooter,
   PasswordInput,
   PrimaryButton,
-  ScreenTopBar,
   TextLink,
 } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const E164_PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
 
@@ -23,6 +23,7 @@ const E164_PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
  * - OTP code is empty by default; adheres to DEFAULT_OTP_CONFIG bounds.
  * - Minimum 8-character password validation.
  * - Transitions back to sign-in upon simulated password reset.
+ * - Note: No BrandLogo badge in Figma frame for compact form layout.
  */
 export default function ResetPhoneConfirmScreen() {
   const router = useRouter();
@@ -83,105 +84,84 @@ export default function ResetPhoneConfirmScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScreenTopBar onBack={() => router.back()} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <AuthHeader
-          title="Confirm Phone Reset"
-          subtitle="Set a new password after OTP verification"
+    <AuthScreenContainer>
+      <AuthHeader
+        title="Confirm Phone Reset"
+        subtitle="Set a new password after OTP verification"
+      />
+
+      <View style={styles.formContainer}>
+        <InputField
+          label="Phone"
+          placeholder="Registered mobile number"
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+          }}
+          keyboardType="phone-pad"
+          error={errors.phone}
         />
 
-        <View style={styles.formContainer}>
-          <InputField
-            label="Phone"
-            placeholder="Registered mobile number"
-            value={phone}
-            onChangeText={(text) => {
-              setPhone(text);
-              if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
-            }}
-            keyboardType="phone-pad"
-            error={errors.phone}
-          />
+        <InputField
+          label="OTP code"
+          placeholder="Verification code"
+          value={otpCode}
+          onChangeText={(text) => {
+            setOtpCode(text);
+            if (errors.otp) setErrors((prev) => ({ ...prev, otp: '' }));
+          }}
+          keyboardType="numeric"
+          error={errors.otp}
+        />
 
-          <InputField
-            label="OTP code"
-            placeholder="Verification code"
-            value={otpCode}
-            onChangeText={(text) => {
-              setOtpCode(text);
-              if (errors.otp) setErrors((prev) => ({ ...prev, otp: '' }));
-            }}
-            keyboardType="numeric"
-            error={errors.otp}
-          />
+        <PasswordInput
+          label="New password"
+          placeholder="Minimum 8 characters"
+          value={newPassword}
+          onChangeText={(text) => {
+            setNewPassword(text);
+            if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+          }}
+          error={errors.password}
+        />
 
-          <PasswordInput
-            label="New password"
-            placeholder="Minimum 8 characters"
-            value={newPassword}
-            onChangeText={(text) => {
-              setNewPassword(text);
-              if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
-            }}
-            error={errors.password}
-          />
+        <PrimaryButton
+          label="Reset password"
+          onPress={handleResetPassword}
+          loading={isLoading}
+          style={styles.submitBtn}
+        />
 
-          <PrimaryButton
-            label="Reset password"
-            onPress={handleResetPassword}
-            loading={isLoading}
-            style={styles.submitBtn}
-          />
-
-          <View style={styles.linksContainer}>
-            <TextLink label="Back / retry request" onPress={() => router.back()} />
-          </View>
-
-          {/* Development autofill gated behind __DEV__ */}
-          {__DEV__ ? (
-            <View style={styles.devContainer}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleFillDemo}
-                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              >
-                <Text style={styles.devButtonText}>Dev: Fill Test Reset</Text>
-              </Pressable>
-            </View>
-          ) : null}
+        <View style={styles.linksContainer}>
+          <TextLink label="Back / retry request" onPress={() => router.back()} />
         </View>
 
-        <LegalFooter
-          onPrivacyPress={() => router.push('/legal/document' as never)}
-          onTermsPress={() => router.push('/legal/document' as never)}
-        />
-      </ScrollView>
-    </View>
+        {/* Development autofill gated behind __DEV__ */}
+        {__DEV__ ? (
+          <View style={styles.devContainer}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={handleFillDemo}
+              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+            >
+              <Text style={styles.devButtonText}>Dev: Fill Test Reset</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+
+      <LegalFooter
+        onPrivacyPress={() => router.push('/legal/document' as never)}
+        onTermsPress={() => router.push('/legal/document' as never)}
+      />
+    </AuthScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#FAF8F4',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 24,
-    justifyContent: 'space-between',
-    minHeight: 740,
-  },
   formContainer: {
-    marginTop: 8,
+    marginTop: 12,
   },
   submitBtn: {
     marginTop: 12,

@@ -16,6 +16,7 @@ import type {
 import { StatusBar } from 'expo-status-bar';
 import { createContext, type PropsWithChildren, type ReactNode, useContext, useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -28,6 +29,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const logoAsset = require('./assets/logo.png');
 
 // Re-export design tokens for consumer convenience
 export { colors, palette, radii, shadows, spacing, typography };
@@ -288,14 +291,17 @@ export interface HeaderProps {
 }
 
 export function Header({ title, subtitle, eyebrow, onBack, rightAction }: HeaderProps) {
+  const cleanEyebrow =
+    eyebrow && /^(CUS|STF)-[A-Z0-9-]+$/.test(eyebrow.trim()) ? undefined : eyebrow;
   return (
     <View style={styles.header}>
       {onBack ? (
         <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={styles.backButtonChevron}>‹</Text>
+          <Text style={styles.backButtonText}>Back</Text>
         </Pressable>
       ) : null}
-      {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
+      {cleanEyebrow ? <Text style={styles.eyebrow}>{cleanEyebrow}</Text> : null}
       <View style={styles.headerRow}>
         <View style={styles.headerTextGroup}>
           <Text style={styles.heading}>{title}</Text>
@@ -412,11 +418,13 @@ export interface BrandLogoProps {
 export function BrandLogo({ variant = 'customer', style }: BrandLogoProps) {
   const isStaff = variant === 'staff';
   return (
-    <View style={[styles.brandLogoBadge, isStaff && styles.brandLogoStaffBadge, style]}>
-      <Text style={styles.brandLogoTitle}>XTREME</Text>
-      <Text style={[styles.brandLogoSubtitle, isStaff && styles.brandLogoStaffSubtitle]}>
-        {isStaff ? 'STAFF OPS' : 'logo placeholder'}
-      </Text>
+    <View style={[styles.brandLogoContainer, style]}>
+      <Image source={logoAsset} style={styles.brandLogoImage} resizeMode="contain" />
+      {isStaff ? (
+        <View style={styles.brandLogoStaffPill}>
+          <Text style={styles.brandLogoStaffPillText}>STAFF OPERATIONS</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -608,19 +616,58 @@ export function ContextBanner({
 }
 
 /**
- * AuthHeader - Approved Screen Title and Subtitle
+ * AuthHeader - Approved Screen Title and Subtitle with Gold Marker & Eyebrow
  */
 export interface AuthHeaderProps {
   title: string;
   subtitle: string;
+  eyebrow?: string;
   style?: ViewStyle;
 }
 
-export function AuthHeader({ title, subtitle, style }: AuthHeaderProps) {
+export function AuthEyebrow({
+  label = 'CUSTOMER ACCESS',
+  style,
+}: {
+  label?: string;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.authEyebrowRow, style]}>
+      <View style={styles.authEyebrowBar} />
+      <Text style={styles.authEyebrowText}>{label}</Text>
+    </View>
+  );
+}
+
+export function AuthHeader({
+  title,
+  subtitle,
+  eyebrow = 'CUSTOMER ACCESS',
+  style,
+}: AuthHeaderProps) {
   return (
     <View style={[styles.authHeaderContainer, style]}>
+      {eyebrow ? <AuthEyebrow label={eyebrow} /> : null}
       <Text style={styles.authTitle}>{title}</Text>
       <Text style={styles.authSubtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
+/**
+ * OperationalNoticeBox - Approved Staff Notice Box (Figma STF-AUTH-01)
+ */
+export function OperationalNoticeBox({
+  message = 'Operational access only. Customer registration is not available in the Staff App.',
+  style,
+}: {
+  message?: string;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.operationalNoticeContainer, style]}>
+      <Text style={styles.operationalNoticeText}>{message}</Text>
     </View>
   );
 }
@@ -933,14 +980,23 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     marginBottom: spacing.xs,
   },
+  backButtonChevron: {
+    fontSize: 22,
+    fontWeight: '300',
+    color: colors.atlantic,
+    marginRight: 4,
+    marginTop: -2,
+  },
   backButtonText: {
     fontSize: typography.sizes.sm,
     fontWeight: typography.weights.semibold,
-    color: colors.ink,
+    color: colors.atlantic,
   },
   headerRow: {
     flexDirection: 'row',
@@ -1210,7 +1266,63 @@ const styles = StyleSheet.create({
     color: colors.muted,
     lineHeight: 20,
   },
-  // Phase 2.1 High-Fidelity Additions
+  // Phase 2.1 & Phase 2.2 Authoritative Figma Visual Redesign
+  brandLogoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  brandLogoImage: {
+    width: 148,
+    height: 63,
+  },
+  brandLogoStaffPill: {
+    backgroundColor: '#164D53',
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    marginTop: 6,
+  },
+  brandLogoStaffPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FAF8F4',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  authEyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  authEyebrowBar: {
+    width: 28,
+    height: 2,
+    backgroundColor: '#C6A15B',
+    borderRadius: 1,
+    marginRight: 8,
+  },
+  authEyebrowText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#164D53',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  operationalNoticeContainer: {
+    backgroundColor: '#F1E7D2',
+    borderWidth: 1,
+    borderColor: '#C6A15B',
+    borderRadius: 8,
+    padding: 14,
+    marginVertical: 14,
+  },
+  operationalNoticeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#0B0C0E',
+    lineHeight: 17,
+  },
   brandLogoBadge: {
     width: 108,
     height: 58,
@@ -1325,11 +1437,11 @@ const styles = StyleSheet.create({
     color: '#164D53',
   },
   primaryBtnBase: {
-    height: 48,
+    height: 52,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: 10,
   },
   primaryBtnDefault: {
     backgroundColor: '#0B0C0E',
@@ -1350,8 +1462,9 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
   primaryBtnSecondaryText: {
     color: '#0B0C0E',
@@ -1386,7 +1499,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   legalFooterContainer: {
-    marginTop: 24,
+    marginTop: 28,
     paddingBottom: 16,
   },
   legalDivider: {
@@ -1400,14 +1513,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   legalLinkText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
-    color: '#5B616B',
+    color: '#164D53',
   },
   legalDot: {
-    fontSize: 11,
-    color: '#5B616B',
-    marginHorizontal: 8,
+    fontSize: 12,
+    color: '#A6A19A',
+    marginHorizontal: 10,
   },
   topBarBack: {
     paddingVertical: 4,

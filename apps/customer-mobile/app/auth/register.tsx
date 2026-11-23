@@ -46,7 +46,7 @@ export default function RegisterScreen() {
     setLanguageIndex((prev) => (prev + 1) % APPROVED_LANGUAGES.length);
   };
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     setPhone('+221 77 123 4567');
     setEmail('amadou.diallo@example.sn');
     setPassword('concierge2026');
@@ -104,12 +104,15 @@ export default function RegisterScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Create Account" subtitle="Customer registration" />
+      <AuthHeader
+        title="Create account"
+        subtitle="Sign up to book luxury transportation and bespoke concierge services."
+      />
 
       <View style={styles.formContainer}>
         <InputField
           label="Phone"
-          placeholder="E.164 mobile number"
+          placeholder="E.164 mobile number (e.g. +221771234567)"
           value={phone}
           onChangeText={(text) => {
             setPhone(text);
@@ -188,22 +191,10 @@ export default function RegisterScreen() {
 
         <View style={styles.linksContainer}>
           <TextLink
-            label="Return to sign in"
+            label="Already have an account? Sign in"
             onPress={() => router.push('/auth/sign-in' as never)}
           />
         </View>
-
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Test Registration</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -254,25 +245,5 @@ const styles = StyleSheet.create({
   },
   linksContainer: {
     alignItems: 'center',
-  },
-  devContainer: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
   },
 });

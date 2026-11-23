@@ -13,7 +13,7 @@ import {
 } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * CUS-AUTH-03 — Phone OTP Verification
@@ -43,7 +43,7 @@ export default function VerifyPhoneScreen() {
     otpCode.length >= DEFAULT_OTP_CONFIG.minLength &&
     otpCode.length <= DEFAULT_OTP_CONFIG.maxLength;
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     if (!phone) setPhone('+221 77 123 4567');
     setOtpCode('123456');
     setError(undefined);
@@ -83,11 +83,14 @@ export default function VerifyPhoneScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Phone Verification" subtitle="Verify your registered mobile number" />
-
       <View style={styles.badgeWrapper}>
         <BrandLogo variant="customer" />
       </View>
+
+      <AuthHeader
+        title="Verify your phone"
+        subtitle="Enter the 6-digit verification code sent to your mobile device."
+      />
 
       <View style={styles.formContainer}>
         <InputField
@@ -99,8 +102,8 @@ export default function VerifyPhoneScreen() {
         />
 
         <InputField
-          label="OTP code"
-          placeholder="Verification code"
+          label="One-time code"
+          placeholder="••••••"
           value={otpCode}
           onChangeText={(text) => {
             setOtpCode(text);
@@ -119,7 +122,7 @@ export default function VerifyPhoneScreen() {
         />
 
         <View style={styles.resendWrapper}>
-          <TextLink label="Resend / request OTP" onPress={handleResend} />
+          <TextLink label="Didn't receive a code? Resend code" onPress={handleResend} />
         </View>
 
         <NoticeBanner
@@ -127,18 +130,6 @@ export default function VerifyPhoneScreen() {
           message={bannerMessage}
           style={styles.noticeBanner}
         />
-
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Test OTP (123456)</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -151,41 +142,22 @@ export default function VerifyPhoneScreen() {
 
 const styles = StyleSheet.create({
   badgeWrapper: {
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 14,
+    marginBottom: 8,
     alignItems: 'center',
   },
   formContainer: {
     marginTop: 4,
   },
   submitBtn: {
-    marginTop: 14,
+    marginTop: 12,
     marginBottom: 10,
   },
   resendWrapper: {
+    marginTop: 6,
     alignItems: 'center',
   },
   noticeBanner: {
-    marginTop: 18,
-  },
-  devContainer: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
+    marginTop: 14,
   },
 });

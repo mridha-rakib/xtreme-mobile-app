@@ -7,7 +7,7 @@ export default function Screen() {
   const router = useRouter();
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>CUS-BKG-05</Text>
+      <Text style={styles.eyebrow}>BOOKINGS</Text>
       <Text style={styles.title}>My Bookings</Text>
       <Text style={styles.note}>
         Frontend preview route only. No API calls, payments, or user data.

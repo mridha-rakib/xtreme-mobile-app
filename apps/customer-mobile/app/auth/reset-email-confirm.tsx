@@ -9,7 +9,7 @@ import {
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * CUS-AUTH-08 — Email Reset Confirmation (Set New Password)
@@ -28,7 +28,7 @@ export default function ResetEmailConfirmScreen() {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     setNewPassword('secureNewPass2026');
     setError(undefined);
   };
@@ -56,7 +56,10 @@ export default function ResetEmailConfirmScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Set New Password" subtitle="Secure email reset link" />
+      <AuthHeader
+        title="Set a new password"
+        subtitle="Enter your new password to complete the recovery process."
+      />
 
       {/* Secure context card matching Figma CUS-AUTH-08 */}
       <ContextBanner
@@ -86,23 +89,10 @@ export default function ResetEmailConfirmScreen() {
 
         <View style={styles.linksContainer}>
           <TextLink
-            label="Return to sign in"
+            label="Already reset your password? Return to sign in"
             onPress={() => router.push('/auth/sign-in' as never)}
           />
         </View>
-
-        {/* Development autofill gated behind __DEV__ */}
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill New Password</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -126,27 +116,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   linksContainer: {
-    marginTop: 6,
+    marginTop: 8,
     alignItems: 'center',
-  },
-  devContainer: {
-    marginTop: 14,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
   },
 });

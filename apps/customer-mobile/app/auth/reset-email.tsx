@@ -10,7 +10,7 @@ import {
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,7 +30,7 @@ export default function ResetEmailScreen() {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     setEmail('amadou.diallo@example.sn');
     setError(undefined);
   };
@@ -62,16 +62,19 @@ export default function ResetEmailScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Reset by Email" subtitle="Request a secure reset link" />
-
       <View style={styles.badgeWrapper}>
         <BrandLogo variant="customer" />
       </View>
 
+      <AuthHeader
+        title="Reset by email"
+        subtitle="Enter your registered email address to receive password reset instructions."
+      />
+
       <View style={styles.formContainer}>
         <InputField
-          label="Registered email"
-          placeholder="Email address"
+          label="Email address"
+          placeholder="name@domain.com"
           value={email}
           onChangeText={(text) => {
             setEmail(text);
@@ -90,7 +93,10 @@ export default function ResetEmailScreen() {
         />
 
         <View style={styles.linksContainer}>
-          <TextLink label="Back" onPress={() => router.back()} />
+          <TextLink
+            label="Use a different recovery method? Back to recovery options"
+            onPress={() => router.push('/auth/forgot-password' as never)}
+          />
         </View>
 
         {/* Non-disclosure security notice matching Figma CUS-AUTH-07 */}
@@ -99,19 +105,6 @@ export default function ResetEmailScreen() {
           description="The response does not confirm whether an account exists."
           style={styles.noticeSpacing}
         />
-
-        {/* Development autofill gated behind __DEV__ */}
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Test Email</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -124,41 +117,22 @@ export default function ResetEmailScreen() {
 
 const styles = StyleSheet.create({
   badgeWrapper: {
-    marginVertical: 14,
+    marginTop: 14,
+    marginBottom: 8,
     alignItems: 'center',
   },
   formContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   submitBtn: {
     marginTop: 12,
     marginBottom: 8,
   },
   linksContainer: {
-    marginTop: 6,
+    marginTop: 8,
     alignItems: 'center',
   },
   noticeSpacing: {
     marginTop: 14,
-  },
-  devContainer: {
-    marginTop: 12,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
   },
 });

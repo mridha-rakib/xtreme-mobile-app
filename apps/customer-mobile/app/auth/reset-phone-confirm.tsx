@@ -10,7 +10,7 @@ import {
 } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 const E164_PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
 
@@ -35,7 +35,7 @@ export default function ResetPhoneConfirmScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     if (!phone) setPhone('+221 77 123 4567');
     setOtpCode('123456');
     setNewPassword('newPassword2026');
@@ -86,8 +86,8 @@ export default function ResetPhoneConfirmScreen() {
   return (
     <AuthScreenContainer>
       <AuthHeader
-        title="Confirm Phone Reset"
-        subtitle="Set a new password after OTP verification"
+        title="Set a new password"
+        subtitle="Enter the OTP sent to your phone and choose a strong new password."
       />
 
       <View style={styles.formContainer}>
@@ -104,8 +104,8 @@ export default function ResetPhoneConfirmScreen() {
         />
 
         <InputField
-          label="OTP code"
-          placeholder="Verification code"
+          label="One-time code"
+          placeholder="••••••"
           value={otpCode}
           onChangeText={(text) => {
             setOtpCode(text);
@@ -134,21 +134,11 @@ export default function ResetPhoneConfirmScreen() {
         />
 
         <View style={styles.linksContainer}>
-          <TextLink label="Back / retry request" onPress={() => router.back()} />
+          <TextLink
+            label="Need another code? Back or request another OTP"
+            onPress={() => router.back()}
+          />
         </View>
-
-        {/* Development autofill gated behind __DEV__ */}
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Test Reset</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -161,34 +151,14 @@ export default function ResetPhoneConfirmScreen() {
 
 const styles = StyleSheet.create({
   formContainer: {
-    marginTop: 12,
+    marginTop: 8,
   },
   submitBtn: {
     marginTop: 12,
     marginBottom: 8,
   },
   linksContainer: {
-    marginTop: 6,
+    marginTop: 8,
     alignItems: 'center',
-  },
-  devContainer: {
-    marginTop: 14,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
   },
 });

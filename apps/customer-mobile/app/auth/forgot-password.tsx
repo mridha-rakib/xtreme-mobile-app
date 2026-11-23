@@ -23,32 +23,38 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Forgot Password" subtitle="Choose an approved recovery method" />
-
       <View style={styles.badgeWrapper}>
         <BrandLogo variant="customer" />
       </View>
 
+      <AuthHeader
+        title="Reset your password"
+        subtitle="Choose how you would like to receive your recovery instructions."
+      />
+
       <View style={styles.methodsContainer}>
         <RecoveryMethodCard
           badgeLetter="P"
-          badgeColor="#A88343"
+          badgeColor="#C6A15B"
           title="Phone OTP"
-          description="Recover using the registered mobile number."
+          description="Receive a 6-digit verification code on your verified mobile phone."
           onPress={() => router.push('/auth/reset-phone' as never)}
         />
 
         <RecoveryMethodCard
           badgeLetter="E"
           badgeColor="#164D53"
-          title="Email reset link"
-          description="Recover through the registered email address."
+          title="Email link"
+          description="Receive a secure password reset link at your registered email address."
           onPress={() => router.push('/auth/reset-email' as never)}
           style={styles.secondCard}
         />
 
         <View style={styles.linksContainer}>
-          <TextLink label="Back to sign in" onPress={() => router.push('/auth/sign-in' as never)} />
+          <TextLink
+            label="Remember your password? Back to sign in"
+            onPress={() => router.push('/auth/sign-in' as never)}
+          />
         </View>
       </View>
 
@@ -62,17 +68,18 @@ export default function ForgotPasswordScreen() {
 
 const styles = StyleSheet.create({
   badgeWrapper: {
-    marginVertical: 14,
+    marginTop: 14,
+    marginBottom: 8,
     alignItems: 'center',
   },
   methodsContainer: {
     marginTop: 8,
   },
   secondCard: {
-    marginTop: 10,
+    marginTop: 12,
   },
   linksContainer: {
-    marginTop: 14,
+    marginTop: 18,
     alignItems: 'center',
   },
 });

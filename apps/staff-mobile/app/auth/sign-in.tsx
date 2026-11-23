@@ -5,42 +5,48 @@ import {
   BrandLogo,
   InputField,
   LegalFooter,
+  OperationalNoticeBox,
+  PasswordInput,
   PrimaryButton,
   useMockAuth,
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * STF-AUTH-01 — Staff Sign In
  * Operations & Chauffeur authentication portal.
- *
- * SPECIFICATION & ACCEPTANCE COMPLIANCE:
- * - Empty fields by default (no unconditional prefill).
- * - Gated QA dev button behind __DEV__.
- * - Session-aware login transition setting staff state.
+ * Matched to approved Figma node 71:2 (STF-AUTH-01__Sign_In__Ready)
  */
 export default function StaffSignInScreen() {
   const router = useRouter();
   const { login } = useMockAuth();
 
-  const [driverId, setDriverId] = useState('');
-  const [error, setError] = useState<string | undefined>();
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [identifierError, setIdentifierError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFillDemo = () => {
-    setDriverId('STF-DRV-001');
-    setError(undefined);
-  };
-
   const handleSignIn = () => {
-    if (!driverId.trim()) {
-      setError('Staff or Chauffeur ID is required');
-      return;
+    let hasError = false;
+    if (!identifier.trim()) {
+      setIdentifierError('Staff email or operational ID is required');
+      hasError = true;
+    } else {
+      setIdentifierError(undefined);
     }
 
-    setError(undefined);
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else {
+      setPasswordError(undefined);
+    }
+
+    if (hasError) return;
+
     setIsLoading(true);
 
     setTimeout(() => {
@@ -52,45 +58,48 @@ export default function StaffSignInScreen() {
 
   return (
     <AuthScreenContainer brand="XTREME STAFF">
-      <AuthHeader title="Staff Portal" subtitle="Driver & Operations Sign In" />
-
       <View style={styles.badgeWrapper}>
         <BrandLogo variant="staff" />
       </View>
 
+      <AuthHeader
+        eyebrow="OPERATIONAL ACCESS"
+        title="Sign In"
+        subtitle="Operational authentication for drivers, concierge staff, and system administrators."
+      />
+
       <View style={styles.formContainer}>
         <InputField
-          label="Staff / Chauffeur ID"
-          placeholder="e.g. STF-DRV-001"
-          value={driverId}
+          label="Identifier"
+          placeholder="Staff email or operational ID"
+          value={identifier}
           onChangeText={(text) => {
-            setDriverId(text);
-            if (error) setError(undefined);
+            setIdentifier(text);
+            if (identifierError) setIdentifierError(undefined);
           }}
-          autoCapitalize="characters"
-          error={error}
+          autoCapitalize="none"
+          error={identifierError}
+        />
+
+        <PasswordInput
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (passwordError) setPasswordError(undefined);
+          }}
+          error={passwordError}
         />
 
         <PrimaryButton
-          label="Sign In as Staff"
+          label="Sign in"
           onPress={handleSignIn}
           loading={isLoading}
-          variant="atlantic"
           style={styles.submitBtn}
         />
 
-        {/* Development autofill gated behind __DEV__ */}
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Staff ID (STF-DRV-001)</Text>
-            </Pressable>
-          </View>
-        ) : null}
+        <OperationalNoticeBox message="Operational access only. Customer registration is not available in the Staff App." />
       </View>
 
       <LegalFooter
@@ -103,34 +112,15 @@ export default function StaffSignInScreen() {
 
 const styles = StyleSheet.create({
   badgeWrapper: {
-    marginVertical: 14,
+    marginTop: 14,
+    marginBottom: 8,
     alignItems: 'center',
   },
   formContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   submitBtn: {
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  devContainer: {
-    marginTop: 14,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
+    marginTop: 10,
+    marginBottom: 6,
   },
 });

@@ -12,7 +12,7 @@ import {
 } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * CUS-AUTH-01 — Sign In
@@ -35,7 +35,7 @@ export default function SignInScreen() {
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFillDemo = () => {
+  const _handleFillDemo = () => {
     setIdentifier('+221 77 123 4567');
     setPassword('demo-concierge');
     setIdentifierError(undefined);
@@ -73,11 +73,14 @@ export default function SignInScreen() {
 
   return (
     <AuthScreenContainer>
-      <AuthHeader title="Sign In" subtitle="Customer App" />
-
       <View style={styles.badgeWrapper}>
         <BrandLogo variant="customer" />
       </View>
+
+      <AuthHeader
+        title="Sign in"
+        subtitle="Enter your credentials to access your concierge account."
+      />
 
       <View style={styles.formContainer}>
         <InputField
@@ -104,6 +107,13 @@ export default function SignInScreen() {
           error={passwordError}
         />
 
+        <View style={styles.forgotWrapper}>
+          <TextLink
+            label="Forgot your password? Reset password"
+            onPress={() => router.push('/auth/forgot-password' as never)}
+          />
+        </View>
+
         <PrimaryButton
           label="Sign in"
           onPress={handleSignIn}
@@ -111,25 +121,12 @@ export default function SignInScreen() {
           style={styles.submitBtn}
         />
 
-        <View style={styles.linksContainer}>
-          <TextLink label="Create account" onPress={() => router.push('/auth/register' as never)} />
+        <View style={styles.createAccountWrapper}>
           <TextLink
-            label="Forgot password"
-            onPress={() => router.push('/auth/forgot-password' as never)}
+            label="New to XTREME Concierge? Create account"
+            onPress={() => router.push('/auth/register' as never)}
           />
         </View>
-
-        {__DEV__ ? (
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Demo Account</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
 
       <LegalFooter
@@ -142,39 +139,24 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   badgeWrapper: {
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 14,
+    marginBottom: 8,
     alignItems: 'center',
   },
   formContainer: {
     marginTop: 4,
   },
+  forgotWrapper: {
+    alignItems: 'flex-end',
+    marginTop: -4,
+    marginBottom: 8,
+  },
   submitBtn: {
-    marginTop: 14,
-    marginBottom: 12,
+    marginTop: 6,
+    marginBottom: 10,
   },
-  linksContainer: {
-    gap: 6,
+  createAccountWrapper: {
+    marginTop: 6,
     alignItems: 'center',
-  },
-  devContainer: {
-    marginTop: 18,
-    alignItems: 'center',
-  },
-  devButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-    borderWidth: 1,
-    borderColor: '#DDD8CF',
-  },
-  devButtonPressed: {
-    opacity: 0.7,
-  },
-  devButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
   },
 });

@@ -1,5 +1,6 @@
 import { colors, palette, radii, shadows, spacing, typography } from '@xtreme/design-tokens';
 import type { AssignmentStatus, BookingStatus, UserProfile } from '@xtreme/types';
+import { StatusBar } from 'expo-status-bar';
 import { createContext, type PropsWithChildren, type ReactNode, useContext, useState } from 'react';
 import {
   Pressable,
@@ -11,6 +12,7 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Re-export design tokens for consumer convenience
 export { colors, palette, radii, shadows, spacing, typography };
@@ -26,7 +28,7 @@ export interface MockAuthContextType {
 }
 
 const MockAuthContext = createContext<MockAuthContextType>({
-  isAuthenticated: true,
+  isAuthenticated: false,
   currentUser: null,
   login: () => {},
   logout: () => {},
@@ -34,15 +36,15 @@ const MockAuthContext = createContext<MockAuthContextType>({
 
 export function MockAuthProvider({
   children,
-  initialUser,
-  initialAuthenticated = true,
+  initialUser = null,
+  initialAuthenticated = false,
 }: {
   children: ReactNode;
   initialUser?: UserProfile | null;
   initialAuthenticated?: boolean;
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(initialAuthenticated);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(initialUser ?? null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(initialUser);
 
   const login = (user?: UserProfile) => {
     setIsAuthenticated(true);
@@ -329,25 +331,131 @@ export function BrandLogo({ variant = 'customer', style }: BrandLogoProps) {
 }
 
 /**
- * ScreenTopBar - Standard Figma Screen Eyebrow & Brand Header
+ * ScreenTopBar - Native Device-Aware Brand Eyebrow Header
+ *
+ * SPECIFICATION COMPLIANCE:
+ * - Hardcoded '9:41' mockup text removed in favor of native device status bar.
+ * - Respects physical safe area insets (notches, Dynamic Island, status bar heights).
+ * - Ensures dark status bar text and icons against the Ivory Sand canvas.
  */
 export function ScreenTopBar({
-  time = '9:41',
   brand = 'XTREME',
   showDivider = true,
+  onBack,
 }: {
-  time?: string;
   brand?: string;
   showDivider?: boolean;
+  onBack?: () => void;
 }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.screenTopBar}>
+    <View style={[styles.screenTopBar, { paddingTop: Math.max(insets.top, 8) }]}>
+      <StatusBar style="dark" />
       <View style={styles.screenTopBarRow}>
-        <Text style={styles.screenTimeText}>{time}</Text>
+        {onBack ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onBack}
+            hitSlop={8}
+            style={styles.topBarBack}
+          >
+            <Text style={styles.topBarBackText}>← Back</Text>
+          </Pressable>
+        ) : (
+          <View style={{ width: 44 }} />
+        )}
         <Text style={styles.screenBrandText}>{brand}</Text>
-        <View style={{ width: 28 }} />
+        <View style={{ width: 44 }} />
       </View>
       {showDivider ? <View style={styles.screenTopDivider} /> : null}
+    </View>
+  );
+}
+
+/**
+ * RecoveryMethodCard - CUS-AUTH-04 Method Selection Card
+ */
+export interface RecoveryMethodCardProps {
+  badgeLetter: string;
+  badgeColor?: string;
+  title: string;
+  description: string;
+  onPress: () => void;
+  style?: ViewStyle;
+}
+
+export function RecoveryMethodCard({
+  badgeLetter,
+  badgeColor = '#A88343',
+  title,
+  description,
+  onPress,
+  style,
+}: RecoveryMethodCardProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.recoveryCard,
+        shadows.sm,
+        pressed && styles.recoveryCardPressed,
+        style,
+      ]}
+    >
+      <View style={[styles.recoveryBadgeCircle, { borderColor: badgeColor }]}>
+        <Text style={[styles.recoveryBadgeLetter, { color: badgeColor }]}>{badgeLetter}</Text>
+      </View>
+      <View style={styles.recoveryTextGroup}>
+        <Text style={styles.recoveryCardTitle}>{title}</Text>
+        <Text style={styles.recoveryCardDescription}>{description}</Text>
+      </View>
+      <Text style={styles.recoveryChevron}>›</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * NeutralSecurityNotice - CUS-AUTH-05 & CUS-AUTH-07 Non-Disclosure Security Card
+ */
+export function NeutralSecurityNotice({
+  title = 'Neutral request result',
+  description = 'The response does not confirm whether an account exists.',
+  style,
+}: {
+  title?: string;
+  description?: string;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.neutralNoticeContainer, style]}>
+      <Text style={styles.neutralNoticeTitle}>{title}</Text>
+      <Text style={styles.neutralNoticeDesc}>{description}</Text>
+    </View>
+  );
+}
+
+/**
+ * ContextBanner - CUS-AUTH-08 Token Context Security Card
+ */
+export function ContextBanner({
+  title = 'Secure reset context',
+  description = 'The reset token is handled securely and is not displayed.',
+  style,
+}: {
+  title?: string;
+  description?: string;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.contextBannerContainer, style]}>
+      <View style={styles.contextBadgeCircle}>
+        <Text style={styles.contextCheckmark}>✓</Text>
+      </View>
+      <View style={styles.contextTextGroup}>
+        <Text style={styles.contextBannerTitle}>{title}</Text>
+        <Text style={styles.contextBannerDesc}>{description}</Text>
+      </View>
     </View>
   );
 }
@@ -1154,5 +1262,117 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#5B616B',
     marginHorizontal: 8,
+  },
+  topBarBack: {
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  topBarBackText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#164D53',
+  },
+  recoveryCard: {
+    padding: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  recoveryCardPressed: {
+    backgroundColor: '#EEE9E0',
+    borderColor: '#C6A15B',
+  },
+  recoveryBadgeCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+    backgroundColor: '#FAF8F4',
+  },
+  recoveryBadgeLetter: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  recoveryTextGroup: {
+    flex: 1,
+  },
+  recoveryCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    marginBottom: 4,
+  },
+  recoveryCardDescription: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#5B616B',
+    lineHeight: 16,
+  },
+  recoveryChevron: {
+    fontSize: 22,
+    color: '#5B616B',
+    marginLeft: 8,
+  },
+  neutralNoticeContainer: {
+    backgroundColor: '#EEE9E0',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 16,
+  },
+  neutralNoticeTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    marginBottom: 4,
+  },
+  neutralNoticeDesc: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#5B616B',
+    lineHeight: 16,
+  },
+  contextBannerContainer: {
+    backgroundColor: '#DDEBEC',
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 14,
+  },
+  contextBadgeCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#164D53',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  contextCheckmark: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  contextTextGroup: {
+    flex: 1,
+  },
+  contextBannerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    marginBottom: 2,
+  },
+  contextBannerDesc: {
+    fontSize: 11.5,
+    fontWeight: '400',
+    color: '#5B616B',
+    lineHeight: 15,
   },
 });

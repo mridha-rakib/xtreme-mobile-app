@@ -136,16 +136,18 @@ export default function VerifyPhoneScreen() {
             style={styles.noticeBanner}
           />
 
-          {/* Explicit Development Mechanism */}
-          <View style={styles.devContainer}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={handleFillDemo}
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-            >
-              <Text style={styles.devButtonText}>Dev: Fill Test OTP (123456)</Text>
-            </Pressable>
-          </View>
+          {/* Explicit Development Mechanism (Gated behind __DEV__) */}
+          {__DEV__ ? (
+            <View style={styles.devContainer}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleFillDemo}
+                style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
+              >
+                <Text style={styles.devButtonText}>Dev: Fill Test OTP (123456)</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
 
         <LegalFooter

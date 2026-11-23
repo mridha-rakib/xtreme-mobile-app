@@ -302,6 +302,288 @@ export function StatusBadge({ status }: { status: BookingStatus | AssignmentStat
 }
 
 /**
+ * BrandLogo Component - Faithfully replicates the approved Figma badge
+ */
+export interface BrandLogoProps {
+  variant?: 'customer' | 'staff';
+  style?: ViewStyle;
+}
+
+export function BrandLogo({ variant = 'customer', style }: BrandLogoProps) {
+  const isStaff = variant === 'staff';
+  return (
+    <View style={[styles.brandLogoBadge, isStaff && styles.brandLogoStaffBadge, style]}>
+      <Text style={styles.brandLogoTitle}>XTREME</Text>
+      <Text style={[styles.brandLogoSubtitle, isStaff && styles.brandLogoStaffSubtitle]}>
+        {isStaff ? 'STAFF OPS' : 'logo placeholder'}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * ScreenTopBar - Standard Figma Screen Eyebrow & Brand Header
+ */
+export function ScreenTopBar({
+  time = '9:41',
+  brand = 'XTREME',
+  showDivider = true,
+}: {
+  time?: string;
+  brand?: string;
+  showDivider?: boolean;
+}) {
+  return (
+    <View style={styles.screenTopBar}>
+      <View style={styles.screenTopBarRow}>
+        <Text style={styles.screenTimeText}>{time}</Text>
+        <Text style={styles.screenBrandText}>{brand}</Text>
+        <View style={{ width: 28 }} />
+      </View>
+      {showDivider ? <View style={styles.screenTopDivider} /> : null}
+    </View>
+  );
+}
+
+/**
+ * AuthHeader - Approved Screen Title and Subtitle
+ */
+export interface AuthHeaderProps {
+  title: string;
+  subtitle: string;
+  style?: ViewStyle;
+}
+
+export function AuthHeader({ title, subtitle, style }: AuthHeaderProps) {
+  return (
+    <View style={[styles.authHeaderContainer, style]}>
+      <Text style={styles.authTitle}>{title}</Text>
+      <Text style={styles.authSubtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
+/**
+ * InputField - Figma-matched Form Input with Error and Right Action support
+ */
+export interface InputFieldProps {
+  label: string;
+  placeholder?: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  secureTextEntry?: boolean;
+  keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'numeric';
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  rightElement?: ReactNode;
+  editable?: boolean;
+  error?: string;
+  style?: ViewStyle;
+}
+
+export function InputField({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  secureTextEntry,
+  keyboardType = 'default',
+  autoCapitalize = 'none',
+  rightElement,
+  editable = true,
+  error,
+  style,
+}: InputFieldProps) {
+  return (
+    <View style={[styles.fieldContainer, style]}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View
+        style={[
+          styles.fieldInputWrapper,
+          !editable && styles.fieldDisabled,
+          error ? styles.fieldErrorBorder : null,
+        ]}
+      >
+        <TextInput
+          style={styles.fieldTextInput}
+          placeholder={placeholder}
+          placeholderTextColor="#A6A19A"
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={secureTextEntry}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          editable={editable}
+        />
+        {rightElement ? <View style={styles.fieldRightElement}>{rightElement}</View> : null}
+      </View>
+      {error ? <Text style={styles.fieldErrorText}>{error}</Text> : null}
+    </View>
+  );
+}
+
+/**
+ * PasswordInput - InputField with visibility toggle
+ */
+export function PasswordInput({
+  label = 'Password',
+  placeholder = 'Password',
+  value,
+  onChangeText,
+  error,
+  style,
+}: {
+  label?: string;
+  placeholder?: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  error?: string;
+  style?: ViewStyle;
+}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <InputField
+      label={label}
+      placeholder={placeholder}
+      value={value}
+      onChangeText={onChangeText}
+      secureTextEntry={!visible}
+      autoCapitalize="none"
+      error={error}
+      style={style}
+      rightElement={
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setVisible((prev) => !prev)}
+          hitSlop={8}
+        >
+          <Text style={styles.toggleVisibilityText}>{visible ? 'Hide' : 'Show'}</Text>
+        </Pressable>
+      }
+    />
+  );
+}
+
+/**
+ * PrimaryButton - Approved Figma 48px Action Button
+ */
+export interface PrimaryButtonProps {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'atlantic';
+  style?: ViewStyle;
+}
+
+export function PrimaryButton({
+  label,
+  onPress,
+  disabled = false,
+  loading = false,
+  variant = 'primary',
+  style,
+}: PrimaryButtonProps) {
+  const bgStyle =
+    variant === 'atlantic'
+      ? styles.primaryBtnAtlantic
+      : variant === 'secondary'
+        ? styles.primaryBtnSecondary
+        : styles.primaryBtnDefault;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={disabled || loading ? undefined : onPress}
+      disabled={disabled || loading}
+      style={({ pressed }) => [
+        styles.primaryBtnBase,
+        bgStyle,
+        (disabled || loading) && styles.primaryBtnDisabled,
+        pressed && !disabled && !loading && styles.primaryBtnPressed,
+        style,
+      ]}
+    >
+      <Text
+        style={[styles.primaryBtnText, variant === 'secondary' && styles.primaryBtnSecondaryText]}
+      >
+        {loading ? 'Please wait...' : label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/**
+ * TextLink - Approved Figma Luxury Brand Action Link
+ */
+export interface TextLinkProps {
+  label: string;
+  onPress: () => void;
+  color?: string;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
+
+export function TextLink({ label, onPress, color = '#164D53', style, textStyle }: TextLinkProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.textLinkWrapper, pressed && styles.textLinkPressed, style]}
+    >
+      <Text style={[styles.textLinkContent, { color }, textStyle]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * NoticeBanner - Verification and System Notice Card (Figma CUS-AUTH-03)
+ */
+export function NoticeBanner({
+  title,
+  message,
+  style,
+}: {
+  title: string;
+  message: string;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.noticeBannerContainer, style]}>
+      <Text style={styles.noticeBannerTitle}>{title}</Text>
+      <Text style={styles.noticeBannerMessage}>{message}</Text>
+    </View>
+  );
+}
+
+/**
+ * LegalFooter - Approved Privacy & Terms Navigation Links
+ */
+export function LegalFooter({
+  onPrivacyPress,
+  onTermsPress,
+  style,
+}: {
+  onPrivacyPress: () => void;
+  onTermsPress: () => void;
+  style?: ViewStyle;
+}) {
+  return (
+    <View style={[styles.legalFooterContainer, style]}>
+      <View style={styles.legalDivider} />
+      <View style={styles.legalLinksRow}>
+        <Pressable accessibilityRole="button" onPress={onPrivacyPress}>
+          <Text style={styles.legalLinkText}>Privacy Policy</Text>
+        </Pressable>
+        <Text style={styles.legalDot}>•</Text>
+        <Pressable accessibilityRole="button" onPress={onTermsPress}>
+          <Text style={styles.legalLinkText}>Terms & Conditions</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+/**
  * DetailRow Component for Key/Value pairs
  */
 export function DetailRow({
@@ -665,5 +947,205 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.muted,
     lineHeight: 20,
+  },
+  // Phase 2.1 High-Fidelity Additions
+  brandLogoBadge: {
+    width: 108,
+    height: 58,
+    borderRadius: 14,
+    backgroundColor: '#0B0C0E',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  brandLogoStaffBadge: {
+    backgroundColor: '#164D53',
+  },
+  brandLogoTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+  },
+  brandLogoSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#D7C39A',
+    marginTop: 2,
+  },
+  brandLogoStaffSubtitle: {
+    color: '#F1E7D2',
+  },
+  screenTopBar: {
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  screenTopBarRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+  },
+  screenTimeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0B0C0E',
+  },
+  screenBrandText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    letterSpacing: 0.7,
+  },
+  screenTopDivider: {
+    height: 1,
+    backgroundColor: '#DDD8CF',
+    marginTop: 10,
+  },
+  authHeaderContainer: {
+    marginTop: 16,
+    marginBottom: 14,
+  },
+  authTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    letterSpacing: -0.2,
+  },
+  authSubtitle: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#5B616B',
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  fieldContainer: {
+    marginBottom: 14,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#5B616B',
+    marginBottom: 6,
+  },
+  fieldInputWrapper: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fieldTextInput: {
+    flex: 1,
+    height: 48,
+    fontSize: 14,
+    color: '#0B0C0E',
+  },
+  fieldDisabled: {
+    backgroundColor: '#EEE9E0',
+  },
+  fieldErrorBorder: {
+    borderColor: '#B33A3A',
+  },
+  fieldErrorText: {
+    fontSize: 11,
+    color: '#B33A3A',
+    marginTop: 4,
+  },
+  fieldRightElement: {
+    marginLeft: 8,
+  },
+  toggleVisibilityText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#164D53',
+  },
+  primaryBtnBase: {
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  primaryBtnDefault: {
+    backgroundColor: '#0B0C0E',
+  },
+  primaryBtnAtlantic: {
+    backgroundColor: '#164D53',
+  },
+  primaryBtnSecondary: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+  },
+  primaryBtnDisabled: {
+    opacity: 0.5,
+  },
+  primaryBtnPressed: {
+    opacity: 0.85,
+  },
+  primaryBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  primaryBtnSecondaryText: {
+    color: '#0B0C0E',
+  },
+  textLinkWrapper: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  textLinkPressed: {
+    opacity: 0.7,
+  },
+  textLinkContent: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  noticeBannerContainer: {
+    backgroundColor: '#DDEBEC',
+    borderRadius: 12,
+    padding: 14,
+    marginVertical: 12,
+  },
+  noticeBannerTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#164D53',
+    marginBottom: 4,
+  },
+  noticeBannerMessage: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#5B616B',
+    lineHeight: 16,
+  },
+  legalFooterContainer: {
+    marginTop: 24,
+    paddingBottom: 16,
+  },
+  legalDivider: {
+    height: 1,
+    backgroundColor: '#DDD8CF',
+    marginBottom: 16,
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  legalLinkText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#5B616B',
+  },
+  legalDot: {
+    fontSize: 11,
+    color: '#5B616B',
+    marginHorizontal: 8,
   },
 });

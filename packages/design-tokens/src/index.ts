@@ -2,7 +2,7 @@ export * from './colors';
 export * from './layout';
 export * from './typography';
 
-// Legacy compatibility alias for existing screens
+// Legacy and semantic convenience aliases
 import { colors } from './colors';
 export const palette = {
   atlantic: colors.atlantic,
@@ -11,5 +11,6 @@ export const palette = {
   line: colors.line,
   accent: colors.accentGold,
   muted: colors.muted,
+  surface: colors.surface,
   terracotta: colors.accentTerracotta,
 } as const;

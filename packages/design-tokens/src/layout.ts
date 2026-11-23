@@ -15,21 +15,29 @@ export const spacing = {
   '3xl': 40,
   '4xl': 48,
   '5xl': 64,
+  '6xl': 80,
 } as const;
 
 export const radii = {
   none: 0,
-  xs: 4,
+  xs: 6,
   sm: 8,
   md: 12,
-  lg: 14,
-  xl: 20,
-  '2xl': 28,
+  badge: 14,
+  lg: 16,
+  xl: 24,
+  screen: 28,
   full: 9999,
 } as const;
 
+export const sizes = {
+  control_s: 40,
+  control_m: 48,
+  control_l: 56,
+} as const;
+
 export const layout = {
-  screenPaddingHorizontal: 20,
+  screenPaddingHorizontal: 22,
   screenPaddingVertical: 24,
   headerHeight: 56,
   bottomBarHeight: 64,

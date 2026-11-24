@@ -9,52 +9,6 @@ import Svg, { Path } from 'react-native-svg';
 
 const logoHeader = require('../../assets/logo.png');
 
-interface ItineraryItem {
-  id: string;
-  title: string;
-  schedule: string;
-  location: string;
-  category: string;
-}
-
-const DEFAULT_ITINERARY_ITEMS: ItineraryItem[] = [
-  {
-    id: 'itin-01',
-    title: 'Airport VIP Arrival & Fast-track Transfer',
-    schedule: 'Day 1 • 08:30 GMT',
-    location: 'DSS International Airport',
-    category: 'VIP Protocol',
-  },
-  {
-    id: 'itin-02',
-    title: 'Private Villa / Luxury Hotel Check-in',
-    schedule: 'Day 1 • 14:00 GMT',
-    location: 'Almadies Luxury Residence',
-    category: 'Accommodation',
-  },
-  {
-    id: 'itin-03',
-    title: 'Private Yacht & Ngor Island Excursion',
-    schedule: 'Day 2 • 10:30 GMT',
-    location: 'Dakar Bay Marina',
-    category: 'Experience',
-  },
-  {
-    id: 'itin-04',
-    title: 'Gourmet Dining & Cultural Evening',
-    schedule: 'Day 2 • 19:30 GMT',
-    location: 'Plateau Dakar',
-    category: 'Gastronomy',
-  },
-  {
-    id: 'itin-05',
-    title: 'Airport Protocol Return Transfer',
-    schedule: 'Day 3 • 16:00 GMT',
-    location: 'Departure Concourse',
-    category: 'VIP Protocol',
-  },
-];
-
 /**
  * CUS-TRIP-02: Trip Detail / Itinerary Screen
  * Authoritative Figma Frame: 60:873 (CUS-TRIP-02__Trip_Detail_Itinerary__Ready)
@@ -195,24 +149,41 @@ export default function TripDetailScreen() {
         {/* Section Heading */}
         <Text style={styles.sectionHeading}>Itinerary</Text>
 
-        {/* 5 Itinerary Item Cards */}
+        {/* Dynamic Days and Stops belonging to this trip */}
         <View style={styles.itineraryList}>
-          {DEFAULT_ITINERARY_ITEMS.map((item, index) => (
-            <View key={item.id} style={styles.itineraryCard}>
-              <View style={styles.itemHeaderRow}>
-                <View style={styles.itemNumberBadge}>
-                  <Text style={styles.itemNumberText}>{index + 1}</Text>
-                </View>
-                <View style={styles.itemTitleBlock}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemCategory}>{item.category}</Text>
-                </View>
+          {trip.days.map((day) => (
+            <View key={day.dayNumber} style={styles.dayGroup}>
+              <View style={styles.dayHeaderRow}>
+                <Text style={styles.dayTitleText}>
+                  Day {day.dayNumber} • {day.title}
+                </Text>
+                <Text style={styles.dayDateText}>{day.date}</Text>
               </View>
 
-              <View style={styles.itemMetaRow}>
-                <Text style={styles.itemSchedule}>{item.schedule}</Text>
-                <Text style={styles.itemLocation}>{item.location}</Text>
-              </View>
+              {day.stops.map((stop, stopIndex) => (
+                <View key={stop.id} style={styles.itineraryCard}>
+                  <View style={styles.itemHeaderRow}>
+                    <View style={styles.itemNumberBadge}>
+                      <Text style={styles.itemNumberText}>{stopIndex + 1}</Text>
+                    </View>
+                    <View style={styles.itemTitleBlock}>
+                      <Text style={styles.itemTitle}>{stop.title}</Text>
+                      <Text style={styles.itemCategory}>{stop.category}</Text>
+                    </View>
+                  </View>
+
+                  {stop.description ? (
+                    <Text style={styles.itemDescription}>{stop.description}</Text>
+                  ) : null}
+
+                  <View style={styles.itemMetaRow}>
+                    <Text style={styles.itemSchedule}>
+                      Day {day.dayNumber} • {stop.time} GMT
+                    </Text>
+                    <Text style={styles.itemLocation}>{stop.location}</Text>
+                  </View>
+                </View>
+              ))}
             </View>
           ))}
         </View>
@@ -362,7 +333,30 @@ const styles = StyleSheet.create({
   },
   itineraryList: {
     paddingHorizontal: 20,
+    gap: 14,
+  },
+  dayGroup: {
     gap: 10,
+    marginBottom: 6,
+  },
+  dayHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+    gap: 8,
+  },
+  dayTitleText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#164D53',
+  },
+  dayDateText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#5B616B',
   },
   itineraryCard: {
     backgroundColor: '#FFFFFF',
@@ -404,6 +398,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8A6A2B',
     textTransform: 'uppercase',
+  },
+  itemDescription: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#5B616B',
+    lineHeight: 18,
+    marginTop: 2,
   },
   itemMetaRow: {
     flexDirection: 'row',

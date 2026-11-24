@@ -1,6 +1,6 @@
 import { CustomerBottomNav } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
@@ -90,6 +90,40 @@ export default function SupportLegalScreen() {
       pathname: '/legal/document',
       params: { slug },
     } as never);
+  };
+
+  const handleContactPress = async (item: ContactCardItem) => {
+    if (item.type === 'email') {
+      const url = `mailto:${item.value}?subject=XTREME%20Concierge%20Client%20Inquiry`;
+      const canOpen = await Linking.canOpenURL(url).catch(() => false);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Email Concierge', `Direct concierge email: ${item.value}`);
+      }
+    } else if (item.type === 'phone') {
+      const telUrl = `tel:${item.value.replace(/[^0-9+]/g, '')}`;
+      const canOpen = await Linking.canOpenURL(telUrl).catch(() => false);
+      if (canOpen) {
+        await Linking.openURL(telUrl);
+      } else {
+        Alert.alert('VIP Client Line', `Direct line: ${item.value}`);
+      }
+    } else if (item.type === 'whatsapp') {
+      const cleanPhone = item.value.replace(/[^0-9]/g, '');
+      const waUrl = `https://wa.me/${cleanPhone}`;
+      const canOpen = await Linking.canOpenURL(waUrl).catch(() => false);
+      if (canOpen) {
+        await Linking.openURL(waUrl);
+      } else {
+        Alert.alert('WhatsApp Support', `Dedicated WhatsApp channel: ${item.value}`);
+      }
+    } else {
+      Alert.alert(
+        'Operational Hours',
+        '24/7 dedicated client support available via concierge dispatch in Dakar, Senegal.',
+      );
+    }
   };
 
   const renderContactIcon = (type: ContactCardItem['type']) => {
@@ -185,15 +219,42 @@ export default function SupportLegalScreen() {
 
         {/* Section: Contact XTREME */}
         <Text style={styles.sectionHeading}>Contact XTREME</Text>
+
+        {/* Staging Notice Banner */}
+        <View style={styles.stagingBanner}>
+          <Text style={styles.stagingBannerTitle}>Direct Client Channels</Text>
+          <Text style={styles.stagingBannerSubtitle}>
+            Staging channels active. Official production telephone and WhatsApp numbers await final
+            client provisioning.
+          </Text>
+        </View>
+
         <View style={styles.contactList}>
           {CONTACT_ITEMS.map((item) => (
-            <View key={item.id} style={styles.contactCard}>
+            <Pressable
+              key={item.id}
+              style={({ pressed }) => [styles.contactCard, pressed && styles.contactCardPressed]}
+              onPress={() => handleContactPress(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Contact via ${item.title}`}
+            >
               <View style={styles.contactIconWrap}>{renderContactIcon(item.type)}</View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactTitle}>{item.title}</Text>
                 <Text style={styles.contactValue}>{item.value}</Text>
               </View>
-            </View>
+              {item.type !== 'hours' ? (
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M9 5L16 12L9 19"
+                    stroke="#164D53"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              ) : null}
+            </Pressable>
           ))}
         </View>
 
@@ -298,6 +359,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#0B0C0E',
   },
+  stagingBanner: {
+    marginHorizontal: 20,
+    backgroundColor: '#FAF6EF',
+    borderWidth: 1,
+    borderColor: '#E4D7B5',
+    borderRadius: 14,
+    padding: 12,
+    gap: 4,
+    marginBottom: 14,
+  },
+  stagingBannerTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#8A6A2B',
+  },
+  stagingBannerSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#5B616B',
+    lineHeight: 16,
+  },
   contactList: {
     paddingHorizontal: 20,
     gap: 10,
@@ -311,6 +393,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+  },
+  contactCardPressed: {
+    backgroundColor: '#F9F7F2',
   },
   contactIconWrap: {
     width: 42,

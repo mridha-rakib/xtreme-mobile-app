@@ -1,10 +1,6 @@
-import {
-  getCustomerProfile,
-  resetCustomerProfile,
-  subscribeCustomerProfile,
-} from '@xtreme/mock-data';
+import { getCustomerProfile, subscribeCustomerProfile } from '@xtreme/mock-data';
 import type { UserProfile } from '@xtreme/types';
-import { CustomerBottomNav } from '@xtreme/ui';
+import { CustomerBottomNav, useMockAuth } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -20,6 +16,7 @@ const logoHeader = require('../../assets/logo.png');
 export default function CustomerProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { logout } = useMockAuth();
   const [profile, setProfile] = useState<UserProfile>(() => getCustomerProfile());
 
   useEffect(() => {
@@ -49,7 +46,7 @@ export default function CustomerProfileScreen() {
           text: 'Log Out',
           style: 'destructive',
           onPress: () => {
-            resetCustomerProfile();
+            logout();
             router.replace('/auth/sign-in' as never);
           },
         },

@@ -7,6 +7,7 @@
  */
 
 import type {
+  BookingDraft,
   BookingRecord,
   ConciergeConversation,
   ConciergeMessage,
@@ -346,7 +347,90 @@ export const sampleBookings: BookingRecord[] = [
     assignedStaffId: 'demo-stf-001',
     createdAt: '2026-11-15T11:20:00Z',
   },
+  {
+    id: 'bkg-demo-004',
+    reference: 'XT-DKR-2026-080',
+    customerId: 'demo-cus-001',
+    serviceId: 'svc-chauffeur-daily',
+    serviceName: 'Almadies Presidential Chauffeur Escort',
+    bookingMode: 'INSTANT',
+    status: 'IN_PROGRESS',
+    date: '2026-11-24',
+    time: '09:00',
+    pickupLocation: 'Villa des Almadies, Route de la Corniche',
+    dropoffLocation: 'Plateau Diplomatic Enclave',
+    passengers: 2,
+    luggageCount: 1,
+    currency: 'XOF',
+    amount: 180000,
+    paymentStatus: 'SUCCEEDED',
+    paymentMethod: 'STRIPE_CARD',
+    assignedStaffId: 'demo-stf-001',
+    notes: 'Diplomatic delegation transit with priority police escort.',
+    createdAt: '2026-11-23T18:00:00Z',
+  },
+  {
+    id: 'bkg-demo-005',
+    reference: 'XT-DKR-2026-078',
+    customerId: 'demo-cus-001',
+    serviceId: 'svc-villa-almadies',
+    serviceName: 'Villa Somone Private Chef & Concierge',
+    bookingMode: 'REQUEST_TO_BOOK',
+    status: 'CANCELLED',
+    date: '2026-11-10',
+    time: '12:00',
+    pickupLocation: 'Somone Lagoon Waterfront Villa',
+    passengers: 4,
+    currency: 'XOF',
+    amount: 320000,
+    paymentStatus: 'REFUNDED',
+    paymentMethod: 'STRIPE_CARD',
+    notes: 'Cancelled within approved policy window. Full refund executed.',
+    createdAt: '2026-11-05T09:30:00Z',
+  },
 ];
+
+/**
+ * Shared in-flight booking draft store across the continuous 5-screen booking journey
+ */
+const INITIAL_BOOKING_DRAFT: BookingDraft = {
+  serviceId: 'svc-airport-fasttrack',
+  serviceName: 'Blaise Diagne VIP Fast-Track & Chauffeur',
+  bookingMode: 'INSTANT',
+  category: 'Airport Transfer',
+  location: 'Blaise Diagne (DSS) → Almadies',
+  pickupLocation: 'Blaise Diagne Airport, VIP Terminal',
+  dropoffLocation: 'Almadies / Ngor Beach, Dakar',
+  passengers: 2,
+  luggageCount: 2,
+  date: '2026-12-05',
+  time: '14:30 GMT',
+  reference: 'XT-DKR-2026-081',
+  status: 'CONFIRMED',
+  paymentStatus: 'SUCCEEDED',
+  currency: 'XOF',
+  amount: 95000,
+  notes: '',
+};
+
+let currentBookingDraft: BookingDraft = { ...INITIAL_BOOKING_DRAFT };
+
+export function getBookingDraft(): BookingDraft {
+  return { ...currentBookingDraft };
+}
+
+export function updateBookingDraft(partial: Partial<BookingDraft>): BookingDraft {
+  currentBookingDraft = {
+    ...currentBookingDraft,
+    ...partial,
+  };
+  return { ...currentBookingDraft };
+}
+
+export function resetBookingDraft(): BookingDraft {
+  currentBookingDraft = { ...INITIAL_BOOKING_DRAFT };
+  return { ...currentBookingDraft };
+}
 
 export const sampleTrips: TripItinerary[] = [
   {

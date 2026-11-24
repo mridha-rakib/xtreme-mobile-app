@@ -473,6 +473,95 @@ export function StatusBadge({ status }: { status: BookingStatus | AssignmentStat
 }
 
 /**
+ * BookingStatusPill Component - Faithful reproduction of Figma Node 52:699 (Status/Booking)
+ * Renders the exact 6x6 tone marker dot + rounded-full pill + status label.
+ */
+export function BookingStatusPill({
+  status,
+  style,
+}: {
+  status: BookingStatus | string;
+  style?: ViewStyle;
+}) {
+  let bg = '#EEE9E0';
+  let dot = '#0B0C0E';
+  let text = '#0B0C0E';
+  let label = status.replace(/_/g, ' ');
+
+  switch (status) {
+    case 'CONFIRMED':
+      bg = '#E6F2EC';
+      dot = '#1F6B4A';
+      text = '#1F6B4A';
+      label = 'CONFIRMED';
+      break;
+    case 'PENDING_VENDOR':
+    case 'PENDING VENDOR':
+      bg = '#F7EFD9';
+      dot = '#8A5610';
+      text = '#8A5610';
+      label = 'PENDING VENDOR';
+      break;
+    case 'PENDING_ADMIN':
+    case 'PENDING ADMIN':
+      bg = '#F7EFD9';
+      dot = '#8A5610';
+      text = '#8A5610';
+      label = 'PENDING ADMIN';
+      break;
+    case 'IN_PROGRESS':
+    case 'IN PROGRESS':
+      bg = '#E8F0F8';
+      dot = '#2F5E8D';
+      text = '#2F5E8D';
+      label = 'IN PROGRESS';
+      break;
+    case 'COMPLETED':
+      bg = '#EEE9E0';
+      dot = '#0B0C0E';
+      text = '#0B0C0E';
+      label = 'COMPLETED';
+      break;
+    case 'CANCELLED':
+      bg = '#FDE8E8';
+      dot = '#9C2121';
+      text = '#9C2121';
+      label = 'CANCELLED';
+      break;
+  }
+
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: bg,
+          borderRadius: 999,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+          alignSelf: 'flex-start',
+        },
+        style,
+      ]}
+    >
+      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dot }} />
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: '600',
+          color: text,
+          letterSpacing: 0.15,
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/**
  * BrandLogo Component - Faithfully replicates the approved Figma badge.
  *
  * BRANDING SPECIFICATION COMPLIANCE NOTE:

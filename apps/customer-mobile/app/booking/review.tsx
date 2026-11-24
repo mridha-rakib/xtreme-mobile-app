@@ -1,5 +1,17 @@
-import { getBookingDraft, sampleServices, updateBookingDraft } from '@xtreme/mock-data';
-import type { BookingMode, CurrencyCode, PaymentStatus } from '@xtreme/types';
+import {
+  addBooking,
+  generateBookingReference,
+  getBookingDraft,
+  sampleServices,
+  updateBookingDraft,
+} from '@xtreme/mock-data';
+import type {
+  BookingMode,
+  BookingRecord,
+  BookingStatus,
+  CurrencyCode,
+  PaymentStatus,
+} from '@xtreme/types';
 import {
   BackButton,
   NavBookingsIcon,
@@ -82,24 +94,57 @@ export default function BookingReviewScreen() {
   const handleSubmitBooking = () => {
     setIsSubmitting(true);
 
-    const generatedRef = `XT-DKR-2026-${Math.floor(100 + Math.random() * 900)}`;
+    const generatedRef = generateBookingReference();
     const newBookingId = `bkg-${Date.now()}`;
-    const paymentStatus: PaymentStatus =
-      reviewData.bookingMode === 'INSTANT' ? 'SUCCEEDED' : 'PENDING';
-    const operationalStatus = reviewData.bookingMode === 'INSTANT' ? 'CONFIRMED' : 'PENDING_VENDOR';
+    const paymentStatus: PaymentStatus = 'PENDING';
+    const operationalStatus: BookingStatus =
+      reviewData.bookingMode === 'INSTANT' ? 'CONFIRMED' : 'PENDING_VENDOR';
+
+    const newBookingRecord: BookingRecord = {
+      id: newBookingId,
+      reference: generatedRef,
+      customerId: 'demo-cus-001',
+      serviceId: service.id,
+      serviceName: reviewData.serviceName,
+      bookingMode: reviewData.bookingMode,
+      status: operationalStatus,
+      date: reviewData.date,
+      time: reviewData.time,
+      schedule: `${reviewData.date} • ${reviewData.time}`,
+      pickupLocation: reviewData.pickup,
+      dropoffLocation: reviewData.destination,
+      passengers: Number.parseInt(reviewData.passengers, 10) || 2,
+      quantity: Number.parseInt(reviewData.passengers, 10) || 2,
+      currency: reviewData.currency,
+      amount: reviewData.amount,
+      depositAmount: Math.round(reviewData.amount * 0.5),
+      remainingBalance: Math.round(reviewData.amount * 0.5),
+      paymentStatus: paymentStatus,
+      paymentMethod: 'STRIPE_CARD',
+      notes: reviewData.notes,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Add to shared live bookings repository so My Bookings and Booking Detail can resolve it immediately
+    addBooking(newBookingRecord);
 
     // Update shared draft store with committed values
     updateBookingDraft({
+      id: newBookingId,
       serviceId: service.id,
       serviceName: reviewData.serviceName,
       bookingMode: reviewData.bookingMode,
       date: reviewData.date,
       time: reviewData.time,
+      schedule: `${reviewData.date} • ${reviewData.time}`,
       passengers: Number.parseInt(reviewData.passengers, 10) || 2,
+      quantity: Number.parseInt(reviewData.passengers, 10) || 2,
       pickupLocation: reviewData.pickup,
       dropoffLocation: reviewData.destination,
       notes: reviewData.notes,
       amount: reviewData.amount,
+      depositAmount: Math.round(reviewData.amount * 0.5),
+      remainingBalance: Math.round(reviewData.amount * 0.5),
       currency: reviewData.currency,
       reference: generatedRef,
       status: operationalStatus,

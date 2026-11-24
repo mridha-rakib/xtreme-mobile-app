@@ -391,7 +391,7 @@ export const sampleBookings: BookingRecord[] = [
 ];
 
 /**
- * Shared in-flight booking draft store across the continuous 5-screen booking journey
+ * Shared in-flight booking draft store across the continuous booking journey
  */
 const INITIAL_BOOKING_DRAFT: BookingDraft = {
   serviceId: 'svc-airport-fasttrack',
@@ -402,14 +402,18 @@ const INITIAL_BOOKING_DRAFT: BookingDraft = {
   pickupLocation: 'Blaise Diagne Airport, VIP Terminal',
   dropoffLocation: 'Almadies / Ngor Beach, Dakar',
   passengers: 2,
+  quantity: 2,
   luggageCount: 2,
   date: '2026-12-05',
   time: '14:30 GMT',
+  schedule: '2026-12-05 • 14:30 GMT',
   reference: 'XT-DKR-2026-081',
   status: 'CONFIRMED',
-  paymentStatus: 'SUCCEEDED',
+  paymentStatus: 'PENDING',
   currency: 'XOF',
   amount: 95000,
+  depositAmount: 47500,
+  remainingBalance: 47500,
   notes: '',
 };
 
@@ -430,6 +434,48 @@ export function updateBookingDraft(partial: Partial<BookingDraft>): BookingDraft
 export function resetBookingDraft(): BookingDraft {
   currentBookingDraft = { ...INITIAL_BOOKING_DRAFT };
   return { ...currentBookingDraft };
+}
+
+/**
+ * Live Frontend Booking Repository
+ * Allows submitted mock bookings to immediately appear in My Bookings,
+ * resolve by exact ID in Booking Detail, and undergo modification/cancellation.
+ */
+let liveBookings: BookingRecord[] = [...sampleBookings];
+let bookingReferenceSequence = 85;
+
+export function getAllBookings(): BookingRecord[] {
+  return [...liveBookings];
+}
+
+export function getBookingById(idOrRef: string): BookingRecord | undefined {
+  return liveBookings.find((b) => b.id === idOrRef || b.reference === idOrRef);
+}
+
+export function generateBookingReference(customSeq?: number): string {
+  const seq = customSeq ?? ++bookingReferenceSequence;
+  return `XT-DKR-2026-${String(seq).padStart(3, '0')}`;
+}
+
+export function addBooking(booking: BookingRecord): BookingRecord {
+  liveBookings = [booking, ...liveBookings.filter((b) => b.id !== booking.id)];
+  return booking;
+}
+
+export function updateBooking(
+  idOrRef: string,
+  partial: Partial<BookingRecord>,
+): BookingRecord | undefined {
+  const index = liveBookings.findIndex((b) => b.id === idOrRef || b.reference === idOrRef);
+  if (index === -1) return undefined;
+  liveBookings[index] = { ...liveBookings[index], ...partial };
+  return liveBookings[index];
+}
+
+export function resetBookings(): void {
+  liveBookings = [...sampleBookings];
+  bookingReferenceSequence = 85;
+  currentBookingDraft = { ...INITIAL_BOOKING_DRAFT };
 }
 
 export const sampleTrips: TripItinerary[] = [

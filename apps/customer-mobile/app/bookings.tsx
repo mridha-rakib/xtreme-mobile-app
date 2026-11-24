@@ -1,4 +1,4 @@
-import { sampleBookings } from '@xtreme/mock-data';
+import { getAllBookings } from '@xtreme/mock-data';
 import type { BookingRecord } from '@xtreme/types';
 import {
   BookingStatusPill,
@@ -26,22 +26,23 @@ export default function MyBookingsScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<BookingTab>('All');
 
-  // Filter bookings based on active tab
+  // Filter bookings based on active tab from live repository
+  const allBookings = getAllBookings();
   const filteredBookings = useMemo(() => {
     if (activeTab === 'All') {
-      return sampleBookings;
+      return allBookings;
     }
     if (activeTab === 'Upcoming') {
-      return sampleBookings.filter(
+      return allBookings.filter(
         (b) =>
           b.status === 'CONFIRMED' || b.status === 'PENDING_VENDOR' || b.status === 'IN_PROGRESS',
       );
     }
     if (activeTab === 'Past') {
-      return sampleBookings.filter((b) => b.status === 'COMPLETED' || b.status === 'CANCELLED');
+      return allBookings.filter((b) => b.status === 'COMPLETED' || b.status === 'CANCELLED');
     }
-    return sampleBookings;
-  }, [activeTab]);
+    return allBookings;
+  }, [activeTab, allBookings]);
 
   const handleBookingPress = (booking: BookingRecord) => {
     router.push({

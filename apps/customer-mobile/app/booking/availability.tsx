@@ -40,6 +40,7 @@ export default function AvailabilitySelectionScreen() {
     pickup?: string;
     destination?: string;
     passengers?: string;
+    quantity?: string;
     notes?: string;
     currency?: string;
   }>();
@@ -62,7 +63,8 @@ export default function AvailabilitySelectionScreen() {
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(params.time || '14:30 GMT');
 
-  const passengerCount = params.passengers || String(draft.passengers || 2);
+  const passengerCount = params.passengers || params.quantity || String(draft.passengers || 2);
+  const minSelectableDay = 4; // Past dates (days 1-3) cannot be booked
 
   const formattedSelectedDate = useMemo(() => {
     const dayStr = selectedDay < 10 ? `0${selectedDay}` : `${selectedDay}`;
@@ -70,6 +72,11 @@ export default function AvailabilitySelectionScreen() {
   }, [selectedDay]);
 
   const handleContinue = () => {
+    if (selectedDay < minSelectableDay) {
+      return;
+    }
+    const scheduleStr = `${formattedSelectedDate} • ${selectedTimeSlot}`;
+
     // Update shared draft store
     updateBookingDraft({
       serviceId: service.id,
@@ -77,7 +84,9 @@ export default function AvailabilitySelectionScreen() {
       bookingMode: service.bookingMode,
       date: formattedSelectedDate,
       time: selectedTimeSlot,
+      schedule: scheduleStr,
       passengers: Number.parseInt(passengerCount, 10) || 2,
+      quantity: Number.parseInt(passengerCount, 10) || 2,
       pickupLocation: params.pickup || draft.pickupLocation,
       dropoffLocation: params.destination || draft.dropoffLocation,
       notes: params.notes || draft.notes,
@@ -93,9 +102,11 @@ export default function AvailabilitySelectionScreen() {
         serviceName: service.name,
         date: formattedSelectedDate,
         time: selectedTimeSlot,
+        schedule: scheduleStr,
         pickup: params.pickup || draft.pickupLocation,
         destination: params.destination || draft.dropoffLocation,
         passengers: passengerCount,
+        quantity: passengerCount,
         notes: params.notes || draft.notes,
         currency: params.currency || service.currency,
       },
@@ -170,17 +181,29 @@ export default function AvailabilitySelectionScreen() {
           {/* Days Grid */}
           <View style={styles.calendarGrid}>
             {calendarDays.map((d) => {
+              const isPast = d < minSelectableDay;
               const isSelected = selectedDay === d;
               return (
                 <Pressable
                   key={`cal-day-${d}`}
-                  style={[styles.dayCell, isSelected && styles.dayCellSelected]}
-                  onPress={() => setSelectedDay(d)}
+                  style={[
+                    styles.dayCell,
+                    isSelected && styles.dayCellSelected,
+                    isPast && styles.dayCellDisabled,
+                  ]}
+                  onPress={() => !isPast && setSelectedDay(d)}
+                  disabled={isPast}
                   accessibilityRole="button"
                   accessibilityLabel={`Select December ${d}`}
-                  accessibilityState={{ selected: isSelected }}
+                  accessibilityState={{ selected: isSelected, disabled: isPast }}
                 >
-                  <Text style={[styles.dayCellText, isSelected && styles.dayCellTextSelected]}>
+                  <Text
+                    style={[
+                      styles.dayCellText,
+                      isSelected && styles.dayCellTextSelected,
+                      isPast && styles.dayCellTextDisabled,
+                    ]}
+                  >
                     {d}
                   </Text>
                 </Pressable>
@@ -418,6 +441,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#C6A15B',
   },
+  dayCellDisabled: {
+    backgroundColor: '#F7F6F2',
+    opacity: 0.4,
+  },
   dayCellText: {
     fontSize: 12,
     fontWeight: '500',
@@ -427,6 +454,9 @@ const styles = StyleSheet.create({
   dayCellTextSelected: {
     fontWeight: '700',
     color: '#A88343',
+  },
+  dayCellTextDisabled: {
+    color: '#A0A4AC',
   },
   timeSection: {
     marginHorizontal: 20,

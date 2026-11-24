@@ -1,6 +1,7 @@
 import { colors, palette, radii, shadows, spacing, typography } from '@xtreme/design-tokens';
 import {
   DEFAULT_DEMO_IDS,
+  resetBookings,
   sampleCustomer,
   sampleDriver,
   sampleOperationsUser,
@@ -140,6 +141,7 @@ export function MockAuthProvider({
     setCurrentUser(null);
     setActivePersona('customer');
     setScenarioState('success');
+    resetBookings();
     if (isDemoPermitted) {
       setIsDemoModeState(true);
     }

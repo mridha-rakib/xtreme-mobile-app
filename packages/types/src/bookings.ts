@@ -19,7 +19,37 @@ export type BookingStatus =
 /** Approved payment method for Mobile MVP under Final SRS v1.1 */
 export type PaymentMethodType = 'STRIPE_CARD';
 
-export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+export type PaymentStatus =
+  | 'CREATED'
+  | 'PENDING'
+  | 'REQUIRES_ACTION'
+  | 'PROCESSING'
+  | 'SUCCEEDED'
+  | 'FAILED'
+  | 'CANCELLED'
+  | 'PARTIALLY_REFUNDED'
+  | 'REFUNDED';
+
+export type PaymentPurpose = 'FULL' | 'DEPOSIT' | 'BALANCE';
+
+export type RequestResolutionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN';
+
+export interface BookingModificationRecord {
+  id: string;
+  bookingId: string;
+  requestedChanges: string;
+  reason?: string;
+  status: RequestResolutionStatus;
+  createdAt: string;
+}
+
+export interface BookingCancellationRecord {
+  id: string;
+  bookingId: string;
+  reason?: string;
+  status: RequestResolutionStatus;
+  createdAt: string;
+}
 
 export interface BookingRecord {
   id: string;
@@ -31,16 +61,24 @@ export interface BookingRecord {
   status: BookingStatus;
   date: string;
   time?: string;
+  schedule?: string;
   pickupLocation: string;
   dropoffLocation?: string;
   passengers: number;
+  quantity?: number;
   luggageCount?: number;
   currency: CurrencyCode;
   amount: number;
+  depositAmount?: number;
+  remainingBalance?: number;
   paymentStatus: PaymentStatus;
   paymentMethod?: PaymentMethodType;
+  paymentPurpose?: PaymentPurpose;
+  paymentReference?: string;
   assignedStaffId?: string;
   notes?: string;
+  modificationRequest?: BookingModificationRecord;
+  cancellationRequest?: BookingCancellationRecord;
   createdAt: string;
 }
 
@@ -49,35 +87,41 @@ export interface BookingModificationRequest {
   requestedDate?: string;
   requestedTime?: string;
   requestedPickup?: string;
-  reason: string;
+  requestedChanges?: string;
+  reason?: string;
 }
 
 export interface BookingCancellationRequest {
   bookingId: string;
-  reason: string;
-  agreedToPolicy: boolean;
+  reason?: string;
+  agreedToPolicy?: boolean;
 }
 
 /**
- * Shared in-flight booking draft preserved across the 5-screen booking journey
- * (CUS-BKG-01 -> CUS-BKG-02 -> CUS-BKG-03 -> CUS-BKG-04 -> CUS-BKG-05 / CUS-BKG-06)
+ * Shared in-flight booking draft preserved across the booking journey
  */
 export interface BookingDraft {
+  id?: string;
   serviceId: string;
   serviceName: string;
   bookingMode: BookingMode;
-  category: string;
-  location: string;
+  category?: string;
+  location?: string;
   pickupLocation: string;
   dropoffLocation?: string;
   passengers: number;
-  luggageCount: number;
+  quantity?: number;
+  luggageCount?: number;
   date: string;
   time: string;
+  schedule?: string;
   reference: string;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   currency: CurrencyCode;
   amount: number;
+  depositAmount?: number;
+  remainingBalance?: number;
   notes?: string;
+  configuredFields?: Record<string, string>;
 }

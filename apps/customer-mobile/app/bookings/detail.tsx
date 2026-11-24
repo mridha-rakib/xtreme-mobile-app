@@ -1,4 +1,4 @@
-import { sampleBookings } from '@xtreme/mock-data';
+import { getAllBookings, getBookingById } from '@xtreme/mock-data';
 import type { BookingRecord } from '@xtreme/types';
 import {
   BackButton,
@@ -36,17 +36,18 @@ export default function BookingDetailScreen() {
 
   const booking: BookingRecord | undefined = useMemo(() => {
     if (activeBookingId) {
-      const found = sampleBookings.find(
-        (b) => b.id === activeBookingId || b.reference === activeBookingId,
-      );
+      const found = getBookingById(activeBookingId);
       if (found) return found;
+      // Do not silently substitute an unrelated record when a specific ID was requested
+      return undefined;
     }
     if (activeReference) {
-      const found = sampleBookings.find((b) => b.reference === activeReference);
+      const found = getBookingById(activeReference);
       if (found) return found;
+      return undefined;
     }
-    // Fallback gracefully to first sample booking if none specified
-    return sampleBookings[0];
+    // Only in development preview demo mode when NO param at all was provided
+    return getAllBookings()[0];
   }, [activeBookingId, activeReference]);
 
   const handleBack = () => {

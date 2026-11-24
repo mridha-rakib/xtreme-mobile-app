@@ -1,4 +1,5 @@
-import { sampleLocations, sampleServices } from '@xtreme/mock-data';
+import { sampleLocations, sampleServices, updateBookingDraft } from '@xtreme/mock-data';
+import type { CurrencyCode } from '@xtreme/types';
 import {
   BackButton,
   ChevronDownIcon,
@@ -68,8 +69,23 @@ export default function DynamicBookingInputScreen() {
   }, []);
 
   const handleContinue = () => {
+    const currency = (selectedCurrency.split(' ')[0] as CurrencyCode) || 'XOF';
+    updateBookingDraft({
+      serviceId: service.id,
+      serviceName: service.name,
+      bookingMode: service.bookingMode,
+      pickupLocation: configuredFieldValue,
+      dropoffLocation: selectedDestination,
+      passengers: quantity,
+      quantity,
+      schedule: selectedSchedule,
+      notes: customerNotes,
+      currency,
+      amount: service.displayPrice || 95000,
+    });
+
     router.push({
-      pathname: '/booking/review',
+      pathname: '/booking/availability',
       params: {
         serviceId: service.id,
         serviceName: service.name,
@@ -77,8 +93,9 @@ export default function DynamicBookingInputScreen() {
         destination: selectedDestination,
         schedule: selectedSchedule,
         quantity: String(quantity),
+        passengers: String(quantity),
         notes: customerNotes,
-        currency: selectedCurrency.split(' ')[0],
+        currency,
       },
     } as never);
   };

@@ -8,6 +8,7 @@
       "**",
       "!**/node_modules",
       "!**/.expo",
+      "!**/.next",
       "!**/dist",
       "!**/ios",
       "!**/android",
@@ -36,7 +37,8 @@
     "rules": {
       "preset": "recommended",
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noUnknownAtRules": "off"
       }
     }
   }

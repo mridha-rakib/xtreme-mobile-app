@@ -10,6 +10,8 @@ import type {
   AssignmentStatus,
   BookingDraft,
   BookingRecord,
+  CommandCenterRole,
+  CommandCenterUser,
   ConciergeConversation,
   ConciergeMessage,
   ConciergeRequestRecord,
@@ -1458,4 +1460,151 @@ export function resetStaffState(): void {
   liveStaffAssignments = [...sampleStaffAssignments];
   liveStaffIssueReports = [...sampleStaffIssueReports];
   notifyStaff();
+}
+
+// ---------------------------------------------------------------------------
+// Command Center (Admin Web) Mock Data & Services
+// ---------------------------------------------------------------------------
+
+export const sampleCommandCenterUsers: CommandCenterUser[] = [
+  {
+    id: 'cc-usr-001',
+    email: 'superadmin@xtreme.sn',
+    name: 'Fatou Diagne',
+    role: 'SUPER_ADMIN',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    status: 'ACTIVE',
+    lastLoginAt: '2026-11-24T11:45:00Z',
+  },
+  {
+    id: 'cc-usr-002',
+    email: 'admin@xtreme.sn',
+    name: 'Mamadou Kane',
+    role: 'ADMIN',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    status: 'ACTIVE',
+    lastLoginAt: '2026-11-24T10:15:00Z',
+  },
+  {
+    id: 'cc-usr-003',
+    email: 'concierge@xtreme.sn',
+    name: 'Awa Fall',
+    role: 'CONCIERGE',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    status: 'ACTIVE',
+    lastLoginAt: '2026-11-24T09:30:00Z',
+  },
+  {
+    id: 'cc-usr-004',
+    email: 'vendor@xtreme.sn',
+    name: 'Ibrahima Ba',
+    role: 'VENDOR',
+    vendorId: 'vnd-dakar-fleet-01',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    status: 'ACTIVE',
+    lastLoginAt: '2026-11-24T08:00:00Z',
+  },
+];
+
+let liveCommandCenterUsers: CommandCenterUser[] = [...sampleCommandCenterUsers];
+
+type CommandCenterListener = () => void;
+const commandCenterListeners: Set<CommandCenterListener> = new Set();
+
+export function subscribeCommandCenter(listener: CommandCenterListener): () => void {
+  commandCenterListeners.add(listener);
+  return () => commandCenterListeners.delete(listener);
+}
+
+function notifyCommandCenter(): void {
+  commandCenterListeners.forEach((fn) => {
+    fn();
+  });
+}
+
+export function getAllCommandCenterUsers(): CommandCenterUser[] {
+  return [...liveCommandCenterUsers];
+}
+
+export function getCommandCenterUserByRole(role: CommandCenterRole): CommandCenterUser | undefined {
+  return liveCommandCenterUsers.find((u) => u.role === role);
+}
+
+export function getCommandCenterUserById(id: string): CommandCenterUser | undefined {
+  return liveCommandCenterUsers.find((u) => u.id === id);
+}
+
+export function authenticateCommandCenter(
+  email: string,
+  _password?: string,
+): { success: boolean; user?: CommandCenterUser; error?: string } {
+  const normalized = email.trim().toLowerCase();
+  const user = liveCommandCenterUsers.find((u) => u.email.toLowerCase() === normalized);
+
+  if (!user) {
+    return {
+      success: false,
+      error: 'Invalid credentials or wrong role. Access to Command Center is restricted.',
+    };
+  }
+
+  if (user.status !== 'ACTIVE') {
+    return {
+      success: false,
+      error: 'Your account is suspended. Please contact platform administration.',
+    };
+  }
+
+  return {
+    success: true,
+    user,
+  };
+}
+
+export interface CommandCenterKpis {
+  roleScopedBookings: number;
+  assignmentsWork: number;
+  conciergeRequests: number;
+  roleSpecificItems: number;
+}
+
+export function getCommandCenterKpis(
+  role: CommandCenterRole,
+  vendorId?: string,
+): CommandCenterKpis {
+  const allBookings = getAllBookings();
+  const allAssignments = getAllStaffAssignments();
+  const allRequests = getAllConciergeRequests();
+
+  if (role === 'VENDOR') {
+    return {
+      roleScopedBookings:
+        allBookings.filter((b) => b.pickupLocation?.includes(vendorId || 'Dakar')).length || 4,
+      assignmentsWork: allAssignments.filter((a) => a.vehiclePlate?.startsWith('DK')).length || 6,
+      conciergeRequests: 0,
+      roleSpecificItems: 8, // active assets in vendor fleet
+    };
+  }
+
+  if (role === 'CONCIERGE') {
+    return {
+      roleScopedBookings: allBookings.length,
+      assignmentsWork: allAssignments.length,
+      conciergeRequests: allRequests.length,
+      roleSpecificItems: allRequests.filter((r) => r.status === 'IN_REVIEW').length,
+    };
+  }
+
+  // ADMIN / SUPER_ADMIN
+  return {
+    roleScopedBookings: 24,
+    assignmentsWork: 17,
+    conciergeRequests: 38,
+    roleSpecificItems: 5,
+  };
+}
+
+export function resetCommandCenterState(): void {
+  liveCommandCenterUsers = [...sampleCommandCenterUsers];
+  notifyCommandCenter();
 }

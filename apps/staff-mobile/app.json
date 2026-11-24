@@ -36,7 +36,8 @@
         {
           "backgroundColor": "#FAF8F4",
           "image": "./assets/splash.png",
-          "imageWidth": 200
+          "imageWidth": 240,
+          "resizeMode": "contain"
         }
       ]
     ],

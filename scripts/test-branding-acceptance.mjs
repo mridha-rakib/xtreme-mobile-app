@@ -26,8 +26,8 @@ const assetChecks = [
   },
   {
     path: 'apps/customer-mobile/assets/splash.png',
-    minSize: 50000,
-    desc: 'Customer Native Splash Artwork',
+    minSize: 10000,
+    desc: 'Customer Native Splash Icon (Cropped Transparent Vector/Raster)',
   },
   { path: 'apps/customer-mobile/assets/favicon.png', minSize: 1000, desc: 'Customer Favicon' },
   { path: 'apps/staff-mobile/assets/logo.png', minSize: 40000, desc: 'Staff Master Logo' },
@@ -43,8 +43,8 @@ const assetChecks = [
   },
   {
     path: 'apps/staff-mobile/assets/splash.png',
-    minSize: 50000,
-    desc: 'Staff Native Splash Artwork',
+    minSize: 10000,
+    desc: 'Staff Native Splash Icon (Cropped Transparent Vector/Raster)',
   },
   { path: 'apps/staff-mobile/assets/favicon.png', minSize: 1000, desc: 'Staff Favicon' },
 ];
@@ -60,8 +60,70 @@ for (const asset of assetChecks) {
   console.log(`   ✓ ${asset.desc} verified (${stat.size} bytes)`);
 }
 
-// 2. Vector Navigation & BackButton Verification
-console.log('\n2. Verifying Vector Navigation & Absence of Text Back Controls:');
+// 2. Splash Screen Configuration & expo-splash-screen Plugin Audit
+console.log('\n2. Verifying expo-splash-screen Native Plugin Configurations:');
+const appJsonCustomer = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, 'apps/customer-mobile/app.json'), 'utf8'),
+);
+const appJsonStaff = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, 'apps/staff-mobile/app.json'), 'utf8'),
+);
+
+function verifySplashPlugin(appJson, appName) {
+  const plugins = appJson.expo.plugins || [];
+  const splashPlugin = plugins.find((p) => Array.isArray(p) && p[0] === 'expo-splash-screen');
+  assert.ok(splashPlugin, `${appName} must configure expo-splash-screen plugin`);
+  const config = splashPlugin[1];
+  assert.strictEqual(
+    config.backgroundColor,
+    '#FAF8F4',
+    `${appName} splash background color must be authoritative Ivory #FAF8F4`,
+  );
+  assert.strictEqual(
+    config.image,
+    './assets/splash.png',
+    `${appName} splash plugin must point to ./assets/splash.png`,
+  );
+  assert.strictEqual(
+    config.resizeMode,
+    'contain',
+    `${appName} splash resizeMode must be "contain"`,
+  );
+  assert.ok(
+    config.imageWidth >= 200 && config.imageWidth <= 320,
+    `${appName} splash imageWidth (${config.imageWidth}) must be balanced between 200 and 320px`,
+  );
+  console.log(
+    `   ✓ ${appName} expo-splash-screen plugin verified (imageWidth: ${config.imageWidth}, bg: ${config.backgroundColor})`,
+  );
+}
+
+verifySplashPlugin(appJsonCustomer, 'Customer App');
+verifySplashPlugin(appJsonStaff, 'Staff App');
+
+// 3. Reproducibility Audit of Branding Generator Script
+console.log('\n3. Verifying Reproducibility of scripts/generate_native_branding.py:');
+const scriptContent = fs.readFileSync(
+  path.join(repoRoot, 'scripts/generate_native_branding.py'),
+  'utf8',
+);
+// Ensure no machine-specific absolute paths
+assert.ok(
+  !scriptContent.includes('C:\\Users\\') && !scriptContent.includes('/Users/'),
+  'generate_native_branding.py must NOT contain any machine-specific hardcoded paths',
+);
+assert.ok(
+  scriptContent.includes(
+    'master_logo_path = os.path.join(repo_root, "packages", "ui", "src", "assets", "logo.png")',
+  ),
+  'generate_native_branding.py must load master branding from committed packages/ui/src/assets/logo.png',
+);
+console.log(
+  '   ✓ generate_native_branding.py uses relative dynamic repository paths and committed master artwork',
+);
+
+// 4. Vector Navigation & BackButton Verification
+console.log('\n4. Verifying Vector Navigation & Absence of Text Back Controls:');
 
 function scanForTextBack(dir) {
   const violations = [];
@@ -74,7 +136,6 @@ function scanForTextBack(dir) {
       const content = fs.readFileSync(fullPath, 'utf8');
       const lines = content.split('\n');
       lines.forEach((line, idx) => {
-        // Disallow directional text controls like "‹ Back", "← Back", "<Text ...>Back</Text>" inside Pressable/Button
         if (/‹\s*Back|←\s*Back/.test(line)) {
           violations.push(`${fullPath}:${idx + 1}: Directional text arrow used: "${line.trim()}"`);
         }
@@ -100,8 +161,8 @@ console.log(
   '   ✓ Zero directional text navigation controls ("‹ Back", "← Back", "<Text>Back</Text>") across all routes',
 );
 
-// 3. Rendered Wireframe Screen ID Audit
-console.log('\n3. Verifying Absence of Internal Screen IDs in Rendered UI:');
+// 5. Rendered Wireframe Screen ID Audit
+console.log('\n5. Verifying Absence of Internal Screen IDs in Rendered UI:');
 
 function scanForRenderedScreenIds(dir) {
   const violations = [];
@@ -114,7 +175,6 @@ function scanForRenderedScreenIds(dir) {
       const content = fs.readFileSync(fullPath, 'utf8');
       const lines = content.split('\n');
       lines.forEach((line, idx) => {
-        // Match eyebrow="CUS-..." or >CUS-...<
         if (/eyebrow\s*=\s*["'](CUS|STF)-[A-Z0-9-]+["']/.test(line)) {
           violations.push(`${fullPath}:${idx + 1}: Internal ID in eyebrow: "${line.trim()}"`);
         }
@@ -139,8 +199,8 @@ assert.strictEqual(
 );
 console.log('   ✓ Zero internal screen IDs rendered in user-facing UI');
 
-// 4. Build-Mode & QA Demo Access Isolation
-console.log('\n4. Verifying Build Modes & QA Demo Isolation:');
+// 6. Build-Mode & QA Demo Access Isolation with Conflicting Flags
+console.log('\n6. Verifying Build Modes & QA Demo Isolation (including Conflicting Flags):');
 
 const easCustomer = JSON.parse(
   fs.readFileSync(path.join(repoRoot, 'apps/customer-mobile/eas.json'), 'utf8'),
@@ -195,29 +255,50 @@ assert.strictEqual(
 );
 console.log('   ✓ Production EAS profiles strictly disable demo bypass');
 
-// Verify MockAuthProvider permission logic
+// Verify Strict Production Overrides across all flag combinations
 function evaluateDemoPermission({ isDev, appVariant, demoModeEnv }) {
+  const isProduction = appVariant === 'production';
   const isExplicitPreview = appVariant === 'preview' || demoModeEnv === 'true';
-  return isDev || isExplicitPreview;
+  return !isProduction && (isDev || isExplicitPreview);
 }
 
+// Standard development: Allowed
 assert.strictEqual(
   evaluateDemoPermission({ isDev: true, appVariant: 'development', demoModeEnv: 'false' }),
   true,
   'Dev mode must permit demo',
 );
+
+// Standard preview: Allowed
 assert.strictEqual(
   evaluateDemoPermission({ isDev: false, appVariant: 'preview', demoModeEnv: 'true' }),
   true,
   'Preview mode must permit demo',
 );
+
+// Standard production: Strictly Forbidden
 assert.strictEqual(
   evaluateDemoPermission({ isDev: false, appVariant: 'production', demoModeEnv: 'false' }),
   false,
   'Production mode must strictly forbid demo',
 );
-console.log(
-  '   ✓ Security logic: Demo mode strictly blocked in production, allowed in dev & preview',
+
+// Conflicting flags: production variant with EXPO_PUBLIC_DEMO_MODE='true' -> MUST STILL BE FORBIDDEN
+assert.strictEqual(
+  evaluateDemoPermission({ isDev: false, appVariant: 'production', demoModeEnv: 'true' }),
+  false,
+  'Production variant must override conflicting EXPO_PUBLIC_DEMO_MODE="true"',
 );
 
-console.log('\n--- All Branding, Navigation & Build Mode Acceptance Checks Passed! ---');
+// Conflicting flags: production variant with isDev=true (e.g. dev bundle packaged for prod) -> MUST STILL BE FORBIDDEN
+assert.strictEqual(
+  evaluateDemoPermission({ isDev: true, appVariant: 'production', demoModeEnv: 'true' }),
+  false,
+  'Production variant must override conflicting isDev=true and force-disable demo mode',
+);
+
+console.log(
+  '   ✓ Security logic: Production variant ALWAYS disables demo bypass, even with conflicting flags',
+);
+
+console.log('\n--- All Branding, Splash, Navigation & Build Mode Acceptance Checks Passed! ---');

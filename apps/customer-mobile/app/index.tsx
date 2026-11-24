@@ -6,10 +6,11 @@ import { Link, Redirect } from 'expo-router';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const isProduction = process.env.EXPO_PUBLIC_APP_VARIANT === 'production';
 const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
 const isPreview =
   process.env.EXPO_PUBLIC_APP_VARIANT === 'preview' || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
-const isDemoAllowed = isDev || isPreview;
+const isDemoAllowed = !isProduction && (isDev || isPreview);
 
 const VERIFIED_AUTH_SCREEN_IDS = new Set([
   'CUS-AUTH-01',

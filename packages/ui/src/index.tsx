@@ -82,11 +82,14 @@ export function MockAuthProvider({
   initialAuthenticated?: boolean;
   initialDemoMode?: boolean;
 }) {
+  // Security rule: Production variant ALWAYS disables demo bypass, regardless of any other flag.
+  const isProduction = process.env.EXPO_PUBLIC_APP_VARIANT === 'production';
   const isDevBuild = typeof __DEV__ !== 'undefined' && __DEV__;
   const isExplicitPreview =
     process.env.EXPO_PUBLIC_APP_VARIANT === 'preview' ||
     process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
-  const isDemoPermitted = isDevBuild || isExplicitPreview;
+
+  const isDemoPermitted = !isProduction && (isDevBuild || isExplicitPreview);
 
   // Security rule: demo bypass can only exist in DEV or explicit preview builds
   const [isDemoMode, setIsDemoModeState] = useState(isDemoPermitted ? initialDemoMode : false);

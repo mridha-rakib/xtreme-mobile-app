@@ -3,6 +3,8 @@ import {
   DEFAULT_DEMO_IDS,
   resetBookings,
   resetConciergeState,
+  resetCustomerProfile,
+  resetTrips,
   sampleCustomer,
   sampleDriver,
   sampleOperationsUser,
@@ -154,6 +156,8 @@ export function MockAuthProvider({
     setScenarioState('success');
     resetBookings();
     resetConciergeState();
+    resetTrips();
+    resetCustomerProfile();
     if (isDemoPermitted) {
       setIsDemoModeState(true);
     }

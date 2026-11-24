@@ -1,8 +1,8 @@
-import { getAllConciergeRequests } from '@xtreme/mock-data';
+import { getAllConciergeRequests, subscribeConcierge } from '@xtreme/mock-data';
 import type { ConciergeRequestRecord } from '@xtreme/types';
 import { ConciergeStatusPill, CustomerBottomNav } from '@xtreme/ui';
-import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,7 +16,19 @@ export default function ConciergeRequestsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const requests = useMemo(() => getAllConciergeRequests(), []);
+  const [requests, setRequests] = useState(() => getAllConciergeRequests());
+
+  useEffect(() => {
+    return subscribeConcierge(() => {
+      setRequests(getAllConciergeRequests());
+    });
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setRequests(getAllConciergeRequests());
+    }, []),
+  );
 
   const handleRequestPress = (req: ConciergeRequestRecord) => {
     router.push({

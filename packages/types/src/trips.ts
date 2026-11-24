@@ -28,3 +28,5 @@ export interface TripItinerary {
   status: 'UPCOMING' | 'ACTIVE' | 'COMPLETED';
   days: ItineraryDay[];
 }
+
+export type Trip = TripItinerary;

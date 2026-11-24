@@ -33,6 +33,15 @@ const REQUEST_TYPES = [
   'Custom Lifestyle Request',
 ];
 
+const REQUEST_TYPE_MAP: Record<string, string> = {
+  'Plan My Entire Trip (Full Itinerary)': 'PLAN_TRIP',
+  'VIP Airport Protocol & Transfer': 'VIP_TRANSPORT',
+  'Private Aviation & Jet Charter': 'AIR_CHARTER',
+  'Luxury Villa & Estate Rental': 'VILLA_RENTAL',
+  'Exclusive Dining & Private Chef': 'DINING',
+  'Custom Lifestyle Request': 'CUSTOM',
+};
+
 /**
  * CUS-CON-01: Plan My Entire Trip / Concierge Request
  * Authoritative Figma Frame: 60:916 (CUS-CON-01__Plan_My_Entire_Trip_Concierge_Request__Editing)
@@ -46,6 +55,7 @@ export default function PlanTripScreen() {
   const [tripContext, setTripContext] = useState<string>('Select linked trip when applicable');
   const [serviceContext, setServiceContext] = useState<string>('Selected service when applicable');
   const [details, setDetails] = useState<string>('');
+  const [detailsError, setDetailsError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Picker modals
@@ -74,19 +84,27 @@ export default function PlanTripScreen() {
 
   const handleSubmit = () => {
     if (isSubmitting) return;
+
+    const trimmedDetails = details.trim();
+    if (!trimmedDetails) {
+      setDetailsError('Please describe your request details before submitting.');
+      return;
+    }
+    setDetailsError(null);
     setIsSubmitting(true);
 
     const ref = generateConciergeReference();
     const reqId = `req-con-${Date.now()}`;
     const convId = `conv-${Date.now()}`;
+    const mappedType = REQUEST_TYPE_MAP[requestType] || 'PLAN_TRIP';
 
     const newRequest: ConciergeRequestRecord = {
       id: reqId,
       reference: ref,
       customerId: 'demo-cus-001',
       title: requestType.split('(')[0].trim(),
-      type: 'PLAN_TRIP',
-      details: details.trim() || 'Comprehensive trip planning request with custom preferences.',
+      type: mappedType,
+      details: trimmedDetails,
       tripContext: tripContext !== 'Select linked trip when applicable' ? tripContext : undefined,
       serviceContext:
         serviceContext !== 'Selected service when applicable' ? serviceContext : undefined,
@@ -235,18 +253,22 @@ export default function PlanTripScreen() {
           {/* Field 4: Details */}
           <View style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Details</Text>
-            <View style={styles.textAreaBox}>
+            <View style={[styles.textAreaBox, detailsError ? styles.textAreaBoxError : null]}>
               <TextInput
                 style={styles.textAreaInput}
                 multiline
                 numberOfLines={4}
                 value={details}
-                onChangeText={setDetails}
+                onChangeText={(t) => {
+                  setDetails(t);
+                  if (detailsError) setDetailsError(null);
+                }}
                 placeholder="Describe the request"
                 placeholderTextColor="#5B616B"
                 textAlignVertical="top"
               />
             </View>
+            {detailsError && <Text style={styles.errorText}>{detailsError}</Text>}
           </View>
 
           {/* Submit Button */}
@@ -445,6 +467,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 138,
     padding: 12,
+  },
+  textAreaBoxError: {
+    borderColor: '#9C2121',
+  },
+  errorText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#9C2121',
+    marginTop: 2,
   },
   textAreaInput: {
     flex: 1,

@@ -1,8 +1,8 @@
-import { getAllConversations } from '@xtreme/mock-data';
+import { getAllConversations, subscribeConcierge } from '@xtreme/mock-data';
 import type { ConciergeConversation } from '@xtreme/types';
 import { ConversationReadPill, CustomerBottomNav } from '@xtreme/ui';
-import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,7 +16,19 @@ export default function ConciergeConversationsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const conversations = useMemo(() => getAllConversations(), []);
+  const [conversations, setConversations] = useState(() => getAllConversations());
+
+  useEffect(() => {
+    return subscribeConcierge(() => {
+      setConversations(getAllConversations());
+    });
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setConversations(getAllConversations());
+    }, []),
+  );
 
   const handleConversationPress = (conv: ConciergeConversation) => {
     router.push({

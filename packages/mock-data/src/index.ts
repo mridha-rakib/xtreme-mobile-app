@@ -539,12 +539,12 @@ export function resetBookings(): void {
 export const sampleTrips: TripItinerary[] = [
   {
     id: 'trip-demo-001',
-    reference: 'TRIP-SN-2026-004',
+    reference: 'TRIP-SN-2026-001',
     title: 'Senegal Atlantic Heritage & Luxury Retreat',
     destination: 'Dakar • Gorée • Somone • Saly',
     startDate: '2026-12-05',
     endDate: '2026-12-09',
-    status: 'UPCOMING',
+    status: 'ACTIVE',
     days: [
       {
         dayNumber: 1,
@@ -586,7 +586,107 @@ export const sampleTrips: TripItinerary[] = [
       },
     ],
   },
+  {
+    id: 'trip-demo-002',
+    reference: 'TRIP-SN-2026-002',
+    title: 'Lac Rose & Desert Safari Expedition',
+    destination: 'Dakar • Lac Rose • Lompoul',
+    startDate: '2026-12-12',
+    endDate: '2026-12-14',
+    status: 'ACTIVE',
+    days: [
+      {
+        dayNumber: 1,
+        date: '2026-12-12',
+        title: 'Helicopter Transfer & Pink Lake Quad Safari',
+        stops: [
+          {
+            id: 'stop-2-1',
+            time: '10:30',
+            title: 'Helicopter Departure from DSS',
+            location: 'Blaise Diagne VIP Pavilion',
+            description: 'Airbus H130 flight to private helipad near Lac Rose',
+            category: 'TRANSFER',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'trip-demo-003',
+    reference: 'TRIP-SN-2026-003',
+    title: 'Cap Skirring Coastal Getaway',
+    destination: 'Casamance • Cap Skirring',
+    startDate: '2026-11-10',
+    endDate: '2026-11-15',
+    status: 'COMPLETED',
+    days: [
+      {
+        dayNumber: 1,
+        date: '2026-11-10',
+        title: 'Private Flight to Cap Skirring',
+        stops: [
+          {
+            id: 'stop-3-1',
+            time: '11:00',
+            title: 'Executive Air Charter Arrival',
+            location: 'Cap Skirring Airport (CSK)',
+            description: 'VIP tarmac welcome and private villa transfer',
+            category: 'TRANSFER',
+          },
+        ],
+      },
+    ],
+  },
 ];
+
+/**
+ * Live Frontend Trips Repository
+ */
+let liveTrips: TripItinerary[] = [...sampleTrips];
+
+export function getAllTrips(): TripItinerary[] {
+  return [...liveTrips];
+}
+
+export function getTripById(id: string): TripItinerary | undefined {
+  return liveTrips.find((t) => t.id === id || t.reference === id);
+}
+
+export function resetTrips(): void {
+  liveTrips = [...sampleTrips];
+}
+
+/**
+ * Live Frontend Customer Profile Store
+ */
+let liveCustomerProfile: UserProfile = { ...sampleCustomer };
+type ProfileListener = (profile: UserProfile) => void;
+const profileListeners: Set<ProfileListener> = new Set();
+
+export function getCustomerProfile(): UserProfile {
+  return { ...liveCustomerProfile };
+}
+
+export function updateCustomerProfile(partial: Partial<UserProfile>): UserProfile {
+  liveCustomerProfile = { ...liveCustomerProfile, ...partial };
+  profileListeners.forEach((fn) => {
+    fn({ ...liveCustomerProfile });
+  });
+  return { ...liveCustomerProfile };
+}
+
+export function subscribeCustomerProfile(listener: ProfileListener): () => void {
+  profileListeners.add(listener);
+  return () => profileListeners.delete(listener);
+}
+
+export function resetCustomerProfile(): void {
+  liveCustomerProfile = { ...sampleCustomer };
+  profileListeners.forEach((fn) => {
+    fn({ ...liveCustomerProfile });
+  });
+}
 
 export const sampleConciergeRequests: ConciergeRequestRecord[] = [
   {
@@ -781,6 +881,20 @@ let liveConversations: ConciergeConversation[] = [...sampleConversations];
 let liveMessages: ConciergeMessage[] = [...sampleMessages];
 let conciergeRefSeq = 45;
 
+type ConciergeListener = () => void;
+const conciergeListeners: Set<ConciergeListener> = new Set();
+
+export function subscribeConcierge(listener: ConciergeListener): () => void {
+  conciergeListeners.add(listener);
+  return () => conciergeListeners.delete(listener);
+}
+
+function notifyConcierge(): void {
+  conciergeListeners.forEach((fn) => {
+    fn();
+  });
+}
+
 export function getAllConciergeRequests(): ConciergeRequestRecord[] {
   return [...liveConciergeRequests];
 }
@@ -796,6 +910,7 @@ export function generateConciergeReference(): string {
 
 export function addConciergeRequest(request: ConciergeRequestRecord): ConciergeRequestRecord {
   liveConciergeRequests = [request, ...liveConciergeRequests.filter((r) => r.id !== request.id)];
+  notifyConcierge();
   return request;
 }
 
@@ -806,6 +921,7 @@ export function updateConciergeRequest(
   const index = liveConciergeRequests.findIndex((r) => r.id === idOrRef || r.reference === idOrRef);
   if (index === -1) return undefined;
   liveConciergeRequests[index] = { ...liveConciergeRequests[index], ...partial };
+  notifyConcierge();
   return liveConciergeRequests[index];
 }
 
@@ -819,6 +935,7 @@ export function getConversationById(id: string): ConciergeConversation | undefin
 
 export function addConversation(conv: ConciergeConversation): ConciergeConversation {
   liveConversations = [conv, ...liveConversations.filter((c) => c.id !== conv.id)];
+  notifyConcierge();
   return conv;
 }
 
@@ -829,7 +946,18 @@ export function updateConversation(
   const index = liveConversations.findIndex((c) => c.id === id);
   if (index === -1) return undefined;
   liveConversations[index] = { ...liveConversations[index], ...partial };
+  notifyConcierge();
   return liveConversations[index];
+}
+
+export function markConversationAsRead(id: string): ConciergeConversation | undefined {
+  const conv = liveConversations.find((c) => c.id === id);
+  if (conv) {
+    conv.unreadCount = 0;
+    conv.status = 'READ';
+    notifyConcierge();
+  }
+  return conv;
 }
 
 export function getMessagesByConversationId(conversationId: string): ConciergeMessage[] {
@@ -844,6 +972,7 @@ export function addMessage(msg: ConciergeMessage): ConciergeMessage {
     conv.lastMessageSnippet = msg.content;
     conv.lastUpdated = msg.timestamp;
   }
+  notifyConcierge();
   return msg;
 }
 
@@ -852,6 +981,7 @@ export function resetConciergeState(): void {
   liveConversations = [...sampleConversations];
   liveMessages = [...sampleMessages];
   conciergeRefSeq = 45;
+  notifyConcierge();
 }
 
 export const sampleStaffAssignments: StaffAssignment[] = [

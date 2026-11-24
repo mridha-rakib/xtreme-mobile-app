@@ -10,6 +10,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 const logoHeader = require('../../assets/logo.png');
 
@@ -21,6 +22,21 @@ const DAYS_OF_WEEK = [
   { id: 'fri', label: 'F' },
   { id: 'sat', label: 'S' },
   { id: 'sun', label: 'S' },
+];
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const TIME_SLOTS = ['09:00 GMT', '11:30 GMT', '14:30 GMT', '17:00 GMT', '20:30 GMT'];
@@ -51,45 +67,79 @@ export default function AvailabilitySelectionScreen() {
     return sampleServices.find((s) => s.id === activeServiceId) || sampleServices[0];
   }, [activeServiceId]);
 
-  // Dynamic calendar dates based on current calendar date
+  // Today reference
   const now = useMemo(() => new Date(), []);
   const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentMonth = now.getMonth(); // 0-11
   const currentDay = now.getDate();
-  const daysInCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const todayStr = useMemo(() => {
+    const m = (currentMonth + 1).toString().padStart(2, '0');
+    const d = currentDay.toString().padStart(2, '0');
+    return `${currentYear}-${m}-${d}`;
+  }, [currentYear, currentMonth, currentDay]);
 
-  const [selectedDay, setSelectedDay] = useState<number>(() => {
+  // View state for month/year navigation
+  const [viewDate, setViewDate] = useState(() => {
     if (params.date) {
       const parts = params.date.split('-');
-      const d = Number.parseInt(parts[parts.length - 1], 10);
-      if (!Number.isNaN(d) && d >= 1 && d <= 31) return d;
+      if (parts.length === 3) {
+        const y = Number.parseInt(parts[0], 10);
+        const m = Number.parseInt(parts[1], 10) - 1;
+        if (!Number.isNaN(y) && !Number.isNaN(m)) {
+          return new Date(y, m, 1);
+        }
+      }
     }
-    // Default to at least currentDay or tomorrow
-    return Math.min(currentDay + 1, daysInCurrentMonth);
+    return new Date(currentYear, currentMonth, 1);
+  });
+
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth(); // 0-11
+  const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  const isCurrentMonth = viewYear === currentYear && viewMonth === currentMonth;
+  const isPastMonth =
+    viewYear < currentYear || (viewYear === currentYear && viewMonth < currentMonth);
+  const canGoPrevMonth = !isCurrentMonth && !isPastMonth;
+
+  const handlePrevMonth = () => {
+    if (canGoPrevMonth) {
+      setViewDate(new Date(viewYear, viewMonth - 1, 1));
+    }
+  };
+
+  const handleNextMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  };
+
+  // Selected date ISO string
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    if (params.date && params.date >= todayStr) {
+      return params.date;
+    }
+    // Default to tomorrow or today
+    const tomorrow = new Date(currentYear, currentMonth, currentDay + 1);
+    const m = (tomorrow.getMonth() + 1).toString().padStart(2, '0');
+    const d = tomorrow.getDate().toString().padStart(2, '0');
+    return `${tomorrow.getFullYear()}-${m}-${d}`;
   });
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(params.time || '14:30 GMT');
 
   const passengerCount = params.passengers || params.quantity || String(draft.passengers || 2);
 
-  const formattedSelectedDate = useMemo(() => {
-    const monthStr = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
-    const dayStr = selectedDay < 10 ? `0${selectedDay}` : `${selectedDay}`;
-    return `${currentYear}-${monthStr}-${dayStr}`;
-  }, [selectedDay, currentYear, currentMonth]);
-
   const handleContinue = () => {
-    if (selectedDay < currentDay) {
+    if (selectedDate < todayStr) {
       return; // Prevent past date booking
     }
-    const scheduleStr = `${formattedSelectedDate} • ${selectedTimeSlot}`;
+    const scheduleStr = `${selectedDate} • ${selectedTimeSlot}`;
 
     // Update shared draft store
     updateBookingDraft({
       serviceId: service.id,
       serviceName: service.name,
       bookingMode: service.bookingMode,
-      date: formattedSelectedDate,
+      date: selectedDate,
       time: selectedTimeSlot,
       schedule: scheduleStr,
       passengers: Number.parseInt(passengerCount, 10) || 2,
@@ -107,7 +157,7 @@ export default function AvailabilitySelectionScreen() {
       params: {
         serviceId: service.id,
         serviceName: service.name,
-        date: formattedSelectedDate,
+        date: selectedDate,
         time: selectedTimeSlot,
         schedule: scheduleStr,
         pickup: params.pickup || draft.pickupLocation,
@@ -128,14 +178,19 @@ export default function AvailabilitySelectionScreen() {
     }
   };
 
-  // Generate calendar days (28-day Figma grid representation)
+  // Generate calendar days
   const calendarDays = useMemo(() => {
     const days: number[] = [];
-    for (let i = 1; i <= Math.min(28, daysInCurrentMonth); i++) {
+    for (let i = 1; i <= daysInViewMonth; i++) {
       days.push(i);
     }
     return days;
-  }, [daysInCurrentMonth]);
+  }, [daysInViewMonth]);
+
+  const trailingSpacers = useMemo(() => {
+    const rem = calendarDays.length % 7;
+    return rem === 0 ? 0 : 7 - rem;
+  }, [calendarDays.length]);
 
   return (
     <View style={styles.screen}>
@@ -176,6 +231,46 @@ export default function AvailabilitySelectionScreen() {
 
         {/* Calendar Grid Card */}
         <View style={styles.calendarCard}>
+          {/* Month / Year Navigation */}
+          <View style={styles.monthHeaderRow}>
+            <Pressable
+              onPress={handlePrevMonth}
+              disabled={!canGoPrevMonth}
+              style={[styles.monthNavBtn, !canGoPrevMonth && styles.monthNavBtnDisabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Previous month"
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M15 19L8 12L15 5"
+                  stroke={canGoPrevMonth ? '#0B0C0E' : '#A0A7B1'}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {MONTH_NAMES[viewMonth]} {viewYear}
+            </Text>
+            <Pressable
+              onPress={handleNextMonth}
+              style={styles.monthNavBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Next month"
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M9 5L16 12L9 19"
+                  stroke="#0B0C0E"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+          </View>
+
           {/* Days of week header */}
           <View style={styles.daysHeaderRow}>
             {DAYS_OF_WEEK.map((d) => (
@@ -188,8 +283,12 @@ export default function AvailabilitySelectionScreen() {
           {/* Days Grid */}
           <View style={styles.calendarGrid}>
             {calendarDays.map((d) => {
-              const isPast = d < currentDay;
-              const isSelected = selectedDay === d;
+              const mStr = (viewMonth + 1).toString().padStart(2, '0');
+              const dStr = d.toString().padStart(2, '0');
+              const cellDateStr = `${viewYear}-${mStr}-${dStr}`;
+              const isPast = cellDateStr < todayStr;
+              const isSelected = selectedDate === cellDateStr;
+
               return (
                 <Pressable
                   key={`cal-day-${d}`}
@@ -198,7 +297,7 @@ export default function AvailabilitySelectionScreen() {
                     isSelected && styles.dayCellSelected,
                     isPast && styles.dayCellDisabled,
                   ]}
-                  onPress={() => !isPast && setSelectedDay(d)}
+                  onPress={() => !isPast && setSelectedDate(cellDateStr)}
                   disabled={isPast}
                   accessibilityRole="button"
                   accessibilityLabel={`Select Day ${d}`}
@@ -216,12 +315,18 @@ export default function AvailabilitySelectionScreen() {
                 </Pressable>
               );
             })}
+            {Array.from(
+              { length: trailingSpacers },
+              (_, i) => `cal-pad-${viewYear}-${viewMonth}-${i}`,
+            ).map((keyId) => (
+              <View key={keyId} style={styles.daySpacerCell} />
+            ))}
           </View>
         </View>
 
         {/* Available Time Slots Section */}
         <View style={styles.timeSection}>
-          <Text style={styles.timeSectionTitle}>Available slots for {formattedSelectedDate}</Text>
+          <Text style={styles.timeSectionTitle}>Available slots for {selectedDate}</Text>
           <View style={styles.timeSlotRow}>
             {TIME_SLOTS.map((slot) => {
               const isSelected = selectedTimeSlot === slot;
@@ -303,7 +408,7 @@ export default function AvailabilitySelectionScreen() {
           {/* Concierge Tab */}
           <Pressable
             style={styles.navItem}
-            onPress={() => router.push('/concierge' as never)}
+            onPress={() => router.push('/concierge/requests' as never)}
             accessibilityRole="tab"
             accessibilityState={{ selected: false }}
           >
@@ -409,6 +514,32 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
   },
+  monthHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 4,
+  },
+  monthNavBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FAF8F4',
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  monthNavBtnDisabled: {
+    opacity: 0.35,
+    borderColor: '#E8E5DF',
+  },
+  monthLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    letterSpacing: -0.2,
+  },
   daysHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -456,6 +587,10 @@ const styles = StyleSheet.create({
   },
   dayCellTextDisabled: {
     color: '#A0A4AC',
+  },
+  daySpacerCell: {
+    width: '13%',
+    height: 32,
   },
   timeSection: {
     marginHorizontal: 20,

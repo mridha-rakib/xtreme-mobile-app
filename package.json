@@ -23,7 +23,8 @@
     "test:booking": "node scripts/test-booking-journey.mjs",
     "test:payments": "node scripts/test-batch3-payments-modifications.mjs",
     "test:concierge": "node scripts/test-concierge-module.mjs",
-    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs && node scripts/test-branding-acceptance.mjs && node scripts/test-discovery-journey.mjs && node scripts/test-booking-journey.mjs && node scripts/test-batch3-payments-modifications.mjs && node scripts/test-concierge-module.mjs"
+    "test:customer-account": "node scripts/test-customer-account.mjs",
+    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs && node scripts/test-branding-acceptance.mjs && node scripts/test-discovery-journey.mjs && node scripts/test-booking-journey.mjs && node scripts/test-batch3-payments-modifications.mjs && node scripts/test-concierge-module.mjs && node scripts/test-customer-account.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",

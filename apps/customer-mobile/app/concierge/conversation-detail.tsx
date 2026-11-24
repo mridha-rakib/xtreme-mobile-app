@@ -1,8 +1,13 @@
-import { addMessage, getMessagesByConversationId } from '@xtreme/mock-data';
+import {
+  addMessage,
+  getConversationById,
+  getMessagesByConversationId,
+  markConversationAsRead,
+} from '@xtreme/mock-data';
 import type { ConciergeMessage } from '@xtreme/types';
-import { CustomerBottomNav } from '@xtreme/ui';
+import { CustomerBottomNav, NotFoundCard } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -31,12 +36,20 @@ export default function ConciergeConversationDetailScreen() {
 
   const activeConvId = params.conversationId || params.id || 'conv-demo-001';
 
+  const conversation = useMemo(() => {
+    if (!activeConvId) return undefined;
+    return getConversationById(activeConvId);
+  }, [activeConvId]);
+
   const [messages, setMessages] = useState<ConciergeMessage[]>([]);
   const [inputText, setInputText] = useState('');
 
-  // Load live messages for this conversation
+  // Load live messages and mark conversation as read
   useEffect(() => {
-    setMessages(getMessagesByConversationId(activeConvId));
+    if (activeConvId) {
+      markConversationAsRead(activeConvId);
+      setMessages(getMessagesByConversationId(activeConvId));
+    }
   }, [activeConvId]);
 
   const handleBack = () => {
@@ -72,6 +85,41 @@ export default function ConciergeConversationDetailScreen() {
     setInputText('');
   };
 
+  if (!conversation) {
+    return (
+      <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.headerRow}>
+          <Pressable
+            style={styles.backButton}
+            onPress={handleBack}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M15 19L8 12L15 5"
+                stroke="#164D53"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </Pressable>
+          <Text style={styles.pageSubtitle}>Conversation</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <NotFoundCard
+            resourceName="Concierge Conversation"
+            resourceId={activeConvId}
+            onBack={() => router.replace('/concierge/conversations' as never)}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screen}>
       <KeyboardAvoidingView
@@ -81,7 +129,7 @@ export default function ConciergeConversationDetailScreen() {
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 90 },
+            { paddingTop: insets.top + 8, paddingBottom: 24 },
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -138,8 +186,10 @@ export default function ConciergeConversationDetailScreen() {
               );
             })}
           </View>
+        </ScrollView>
 
-          {/* Message Input Composer matching Figma node 60:1112 */}
+        {/* Message Input Composer matching Figma node 60:1112 pinned above bottom nav */}
+        <View style={styles.composerWrapper}>
           <View style={styles.composerCard}>
             <TextInput
               style={styles.composerInput}
@@ -164,7 +214,7 @@ export default function ConciergeConversationDetailScreen() {
           <Text style={styles.persistenceNotice}>
             Messages persist with sender, timestamp and read state.
           </Text>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
 
       {/* Bottom Navigation */}
@@ -265,6 +315,11 @@ const styles = StyleSheet.create({
   },
   metaCustomer: {
     textAlign: 'right',
+  },
+  composerWrapper: {
+    backgroundColor: '#FAF8F4',
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   composerCard: {
     marginHorizontal: 20,

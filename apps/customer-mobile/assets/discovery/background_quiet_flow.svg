@@ -1,0 +1,23 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="390" height="844" viewBox="0 0 390 844" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Background/Customer/Quiet Flow" clip-path="url(#clip0_0_251)">
+<rect id="Quiet Flow/Base" width="390" height="844" fill="#FAF8F4"/>
+<ellipse id="Quiet Flow/Top Ivory Veil" cx="375.353" cy="-25.4428" rx="210" ry="125" transform="rotate(-8 375.353 -25.4428)" fill="#F1E7D2" fill-opacity="0.34"/>
+<ellipse id="Quiet Flow/Top Sand Layer" cx="367.939" cy="41.9807" rx="180" ry="110" transform="rotate(8 367.939 41.9807)" fill="#EEE9E0" fill-opacity="0.5"/>
+<ellipse id="Quiet Flow/Right Soft Ribbon" cx="411.747" cy="426.801" rx="105" ry="215" transform="rotate(4 411.747 426.801)" fill="#EEE9E0" fill-opacity="0.34"/>
+<ellipse id="Quiet Flow/Bottom Sand Ribbon" cx="199.063" cy="792.041" rx="360" ry="142.5" transform="rotate(-4 199.063 792.041)" fill="#EEE9E0" fill-opacity="0.58"/>
+<ellipse id="Quiet Flow/Bottom Ivory Veil" cx="200.789" cy="846.272" rx="325" ry="115" transform="rotate(2 200.789 846.272)" fill="#FAF8F4" fill-opacity="0.86"/>
+<mask id="stroke0_0_251" fill="white">
+<path d="M519.84 -72.6789C533.675 25.7649 471.737 115.851 381.497 128.533C291.256 141.215 206.887 71.6921 193.051 -26.7517C179.216 -125.196 241.154 -215.281 331.394 -227.964C421.634 -240.646 506.004 -171.123 519.84 -72.6789Z"/>
+</mask>
+<path id="Quiet Flow/Top Champagne Arc" d="M519.84 -72.6789C533.675 25.7649 471.737 115.851 381.497 128.533C291.256 141.215 206.887 71.6921 193.051 -26.7517C179.216 -125.196 241.154 -215.281 331.394 -227.964C421.634 -240.646 506.004 -171.123 519.84 -72.6789Z" stroke-width="2" stroke="#C6A15B" stroke-opacity="0.3" mask="url(#stroke0_0_251)"/>
+<mask id="stroke1_0_251" fill="white">
+<path d="M563.71 769.41C569.488 852.051 413.388 930.288 215.05 944.157C16.7118 958.026 -148.758 902.276 -154.537 819.635C-160.315 736.994 -4.21513 658.757 194.123 644.888C392.461 631.019 557.931 686.769 563.71 769.41Z"/>
+</mask>
+<path id="Quiet Flow/Bottom Champagne Arc" d="M563.71 769.41C569.488 852.051 413.388 930.288 215.05 944.157C16.7118 958.026 -148.758 902.276 -154.537 819.635C-160.315 736.994 -4.21513 658.757 194.123 644.888C392.461 631.019 557.931 686.769 563.71 769.41Z" stroke-width="2" stroke="#C6A15B" stroke-opacity="0.34" mask="url(#stroke1_0_251)"/>
+</g>
+<defs>
+<clipPath id="clip0_0_251">
+<rect width="390" height="844" fill="white"/>
+</clipPath>
+</defs>
+</svg>

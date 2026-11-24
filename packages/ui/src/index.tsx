@@ -33,6 +33,7 @@ import Svg, { Path } from 'react-native-svg';
 
 const logoAsset = require('./assets/logo.png');
 
+export * from './discovery-icons';
 // Re-export design tokens for consumer convenience
 export { colors, palette, radii, shadows, spacing, typography };
 

@@ -19,7 +19,8 @@
     "test:routes": "node scripts/validate-routes.mjs",
     "test:demo": "node scripts/test-demo-mode.mjs",
     "test:branding": "node scripts/test-branding-acceptance.mjs",
-    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs && node scripts/test-branding-acceptance.mjs"
+    "test:discovery": "node scripts/test-discovery-journey.mjs",
+    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs && node scripts/test-branding-acceptance.mjs && node scripts/test-discovery-journey.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",

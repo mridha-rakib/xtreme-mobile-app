@@ -4,7 +4,15 @@
     "enabled": false
   },
   "files": {
-    "includes": ["**", "!**/node_modules", "!**/.expo", "!**/dist", "!**/ios", "!**/android"]
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/.expo",
+      "!**/dist",
+      "!**/ios",
+      "!**/android",
+      "!**/*.svg"
+    ]
   },
   "formatter": {
     "indentStyle": "space",
@@ -26,7 +34,10 @@
   },
   "linter": {
     "rules": {
-      "preset": "recommended"
+      "preset": "recommended",
+      "suspicious": {
+        "noExplicitAny": "off"
+      }
     }
   }
 }

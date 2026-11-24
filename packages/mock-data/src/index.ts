@@ -7,6 +7,7 @@
  */
 
 import type {
+  AssignmentStatus,
   BookingDraft,
   BookingRecord,
   ConciergeConversation,
@@ -17,6 +18,7 @@ import type {
   ServiceItem,
   ServiceLocation,
   StaffAssignment,
+  StaffIssueReport,
   TripItinerary,
   UserProfile,
 } from '@xtreme/types';
@@ -1081,49 +1083,379 @@ export const sampleStaffAssignments: StaffAssignment[] = [
     id: 'demo-asg-001',
     bookingReference: 'XT-DKR-2026-081',
     title: 'Blaise Diagne VIP Arrival Transfer',
+    serviceName: 'Airport Transfer / VIP Protocol',
     customerName: 'Amadou Diop',
     customerPhone: '+221 77 000 1234',
     pickupTime: '14:30',
+    schedule: '14:30 - 15:30',
     pickupLocation: 'Blaise Diagne Airport (DSS) VIP Pavilion',
     destination: 'Radisson Blu Hotel, Dakar Sea Plaza',
     vehicleAssigned: 'Mercedes-Benz S-Class S580 (Black Obsidian)',
     vehiclePlate: 'DK-2026-XT',
     passengerCount: 2,
+    flightNumber: 'AF718 (Air France VIP Protocol)',
     specialInstructions:
       'Client traveling on AF718. Priority customs assistance already coordinated with protocol.',
     assignmentStatus: 'ASSIGNED',
     bookingStatus: 'CONFIRMED',
     notes: ['Flight tracked on radar', 'Chauffeur in protocol uniform'],
+    date: '2026-11-24',
+    isToday: true,
   },
   {
     id: 'demo-asg-002',
     bookingReference: 'XT-DKR-2026-083',
     title: 'Almadies Executive Diplomatic Transfer',
+    serviceName: 'Executive Chauffeur Service',
     customerName: 'Madame Marie Ndiaye',
     customerPhone: '+221 78 111 2233',
     pickupTime: '18:00',
+    schedule: '18:00 - 19:30',
     pickupLocation: 'Villa des Almadies, Route de la Corniche',
     destination: 'Palais Présidentiel / Plateau',
     vehicleAssigned: 'Range Rover Autobiography (Santorini Black)',
     vehiclePlate: 'DK-7788-AZ',
     passengerCount: 1,
+    specialInstructions: 'Close protection escort protocol requested.',
     assignmentStatus: 'ACCEPTED',
     bookingStatus: 'CONFIRMED',
+    date: '2026-11-24',
+    isToday: true,
   },
   {
     id: 'demo-asg-003',
-    bookingReference: 'XT-DKR-2026-079',
-    title: 'Full-Day Dakar City Business Tour',
-    customerName: 'Amadou Diop',
-    customerPhone: '+221 77 000 1234',
-    pickupTime: '08:00',
-    pickupLocation: 'Almadies Residence',
-    destination: 'Plateau Financial District & Sea Plaza',
+    bookingReference: 'XT-DKR-2026-085',
+    title: 'Somone Lagoon Coastal Chauffeur',
+    serviceName: 'Inter-City Luxury Transfer',
+    customerName: 'Omar Sy',
+    customerPhone: '+221 76 222 3344',
+    pickupTime: '11:15',
+    schedule: '11:15 - 13:00',
+    pickupLocation: 'Plateau Financial District, Immeuble Horizon',
+    destination: 'Somone Waterfront Lagoon Estate',
     vehicleAssigned: 'Mercedes-Benz V-Class VIP Edition',
     vehiclePlate: 'DK-5544-XT',
+    passengerCount: 4,
+    assignmentStatus: 'EN_ROUTE',
+    bookingStatus: 'CONFIRMED',
+    date: '2026-11-24',
+    isToday: true,
+  },
+  {
+    id: 'demo-asg-004',
+    bookingReference: 'XT-DKR-2026-087',
+    title: 'Dakar Financial Summit Motorcade',
+    serviceName: 'Close Protection Motorcade',
+    customerName: 'Cheikh Anta Diop',
+    customerPhone: '+221 77 333 4455',
+    pickupTime: '09:30',
+    schedule: '09:30 - 17:00',
+    pickupLocation: 'King Fahd Palace VIP Suite',
+    destination: 'BCEAO Headquarters / Plateau',
+    vehicleAssigned: 'Cadillac Escalade ESV Armored',
+    vehiclePlate: 'DK-1010-XT',
+    passengerCount: 2,
+    assignmentStatus: 'IN_PROGRESS',
+    bookingStatus: 'CONFIRMED',
+    date: '2026-11-24',
+    isToday: true,
+  },
+  {
+    id: 'demo-asg-005',
+    bookingReference: 'XT-DKR-2026-090',
+    title: 'Lac Rose Safari Private Excursion',
+    serviceName: 'Safari Expedition Chauffeur',
+    customerName: 'Dr. Babacar Ndiaye',
+    customerPhone: '+221 77 444 5566',
+    pickupTime: 'Tomorrow, 08:30',
+    schedule: '08:30 - 16:00',
+    pickupLocation: 'Terrou-Bi Resort VIP Pier',
+    destination: 'Lac Rose Dunes & Salt Lake Safari Camp',
+    vehicleAssigned: 'Toyota Land Cruiser 300 VXR',
+    vehiclePlate: 'DK-9900-XT',
     passengerCount: 3,
+    assignmentStatus: 'ASSIGNED',
+    bookingStatus: 'CONFIRMED',
+    date: '2026-11-25',
+    isUpcoming: true,
+  },
+  {
+    id: 'demo-asg-006',
+    bookingReference: 'XT-DKR-2026-092',
+    title: 'Saly Golf Resort Weekend Transfer',
+    serviceName: 'Luxury Resort Transfer',
+    customerName: 'Sophie Martin',
+    customerPhone: '+221 78 555 6677',
+    pickupTime: 'Nov 26, 15:00',
+    schedule: '15:00 - 17:00',
+    pickupLocation: 'Radisson Blu Hotel, Dakar Sea Plaza',
+    destination: 'The Rhino Resort Hotel & Spa, Saly',
+    vehicleAssigned: 'Mercedes-Benz S-Class S580',
+    vehiclePlate: 'DK-2026-XT',
+    passengerCount: 2,
+    assignmentStatus: 'ACCEPTED',
+    bookingStatus: 'CONFIRMED',
+    date: '2026-11-26',
+    isUpcoming: true,
+  },
+  {
+    id: 'demo-asg-007',
+    bookingReference: 'XT-DKR-2026-079',
+    title: 'Gorée Ferry VIP Protocol Transfer',
+    serviceName: 'Port Protocol Escort',
+    customerName: 'Awa Fall',
+    customerPhone: '+221 77 666 7788',
+    pickupTime: 'Nov 22, 10:00',
+    schedule: '10:00 - 11:30',
+    pickupLocation: 'Radisson Blu Hotel',
+    destination: 'Embarcadère de Dakar',
+    vehicleAssigned: 'Mercedes-Benz V-Class VIP Edition',
+    vehiclePlate: 'DK-5544-XT',
+    passengerCount: 2,
     assignmentStatus: 'COMPLETED',
     bookingStatus: 'COMPLETED',
-    notes: ['Trip finished on schedule', 'Vehicle cleaned and refueled'],
+    date: '2026-11-22',
+    isHistory: true,
+    notes: ['VIP escort completed on time', 'Luggage transferred to private launch'],
+  },
+  {
+    id: 'demo-asg-008',
+    bookingReference: 'XT-DKR-2026-075',
+    title: 'Desert Dune Sunset Transfer',
+    serviceName: 'Desert Excursion Chauffeur',
+    customerName: 'Jean-Luc Dupont',
+    customerPhone: '+221 78 777 8899',
+    pickupTime: 'Nov 20, 16:00',
+    schedule: '16:00 - 19:30',
+    pickupLocation: 'Almadies Residence',
+    destination: 'Lompoul Desert Dunes',
+    vehicleAssigned: 'Range Rover Autobiography',
+    vehiclePlate: 'DK-7788-AZ',
+    passengerCount: 2,
+    assignmentStatus: 'UNABLE_TO_COMPLETE',
+    bookingStatus: 'CONFIRMED',
+    date: '2026-11-20',
+    isHistory: true,
+    notes: [
+      'Radiator temperature alert triggered at km 45',
+      'Client safely transferred to backup unit',
+    ],
+  },
+  {
+    id: 'demo-asg-009',
+    bookingReference: 'XT-DKR-2026-072',
+    title: 'Dakar Fashion Week VIP Shuttle',
+    serviceName: 'Executive Chauffeur Service',
+    customerName: 'Fatou Sow',
+    customerPhone: '+221 77 888 9900',
+    pickupTime: 'Nov 19, 19:00',
+    schedule: '19:00 - 23:00',
+    pickupLocation: 'Sea Plaza Corniche Ouest',
+    destination: 'Grand Théâtre National de Dakar',
+    vehicleAssigned: 'Mercedes-Benz S-Class S580',
+    vehiclePlate: 'DK-2026-XT',
+    passengerCount: 1,
+    assignmentStatus: 'COMPLETED',
+    bookingStatus: 'COMPLETED',
+    date: '2026-11-19',
+    isHistory: true,
+  },
+  {
+    id: 'demo-asg-010',
+    bookingReference: 'XT-DKR-2026-070',
+    title: 'Corniche Ouest Sunset Dinner Chauffeur',
+    serviceName: 'Evening Dining Chauffeur',
+    customerName: 'Ibrahima Kane',
+    customerPhone: '+221 78 999 0011',
+    pickupTime: 'Nov 18, 20:30',
+    schedule: '20:30 - 23:30',
+    pickupLocation: 'Fann Résidence',
+    destination: 'L’Alkimia Almadies',
+    vehicleAssigned: 'Mercedes-Benz S-Class S580',
+    vehiclePlate: 'DK-2026-XT',
+    passengerCount: 2,
+    assignmentStatus: 'COMPLETED',
+    bookingStatus: 'COMPLETED',
+    date: '2026-11-18',
+    isHistory: true,
   },
 ];
+
+export const sampleStaffIssueReports: StaffIssueReport[] = [
+  {
+    id: 'rpt-demo-001',
+    assignmentId: 'demo-asg-008',
+    category: 'VEHICLE_ISSUE',
+    severity: 'CRITICAL',
+    issueContext: 'Vehicle radiator overheating on route to Lompoul',
+    visibilityScope: 'OPERATIONS_ONLY',
+    assignmentOutcome: 'UNABLE_TO_COMPLETE',
+    description:
+      'Vehicle displayed engine coolant warning light at km 45. Safely pulled over to shoulder. Coordinated with Central Operations to dispatch backup Mercedes V-Class for seamless passenger handover.',
+    timestamp: '2026-11-20T16:45:00Z',
+    reportedBy: 'demo-stf-001',
+  },
+];
+
+/**
+ * Live Frontend Staff Repositories
+ */
+let liveStaffAssignments: StaffAssignment[] = [...sampleStaffAssignments];
+let liveStaffIssueReports: StaffIssueReport[] = [...sampleStaffIssueReports];
+
+type StaffListener = () => void;
+const staffListeners: Set<StaffListener> = new Set();
+
+export function subscribeStaff(listener: StaffListener): () => void {
+  staffListeners.add(listener);
+  return () => staffListeners.delete(listener);
+}
+
+function notifyStaff(): void {
+  staffListeners.forEach((fn) => {
+    fn();
+  });
+}
+
+export function getAllStaffAssignments(): StaffAssignment[] {
+  return [...liveStaffAssignments];
+}
+
+export function getStaffAssignmentById(idOrRef: string): StaffAssignment | undefined {
+  return liveStaffAssignments.find(
+    (a) => a.id === idOrRef || a.bookingReference === idOrRef || a.title === idOrRef,
+  );
+}
+
+export function getStaffAssignmentsByTab(tab: 'today' | 'upcoming' | 'history'): StaffAssignment[] {
+  if (tab === 'today') {
+    return liveStaffAssignments.filter(
+      (a) =>
+        a.isToday &&
+        a.assignmentStatus !== 'COMPLETED' &&
+        a.assignmentStatus !== 'UNABLE_TO_COMPLETE',
+    );
+  }
+  if (tab === 'upcoming') {
+    return liveStaffAssignments.filter(
+      (a) =>
+        a.isUpcoming &&
+        a.assignmentStatus !== 'COMPLETED' &&
+        a.assignmentStatus !== 'UNABLE_TO_COMPLETE',
+    );
+  }
+  return getAllStaffHistory();
+}
+
+export function getAllStaffHistory(): StaffAssignment[] {
+  return liveStaffAssignments.filter(
+    (a) =>
+      a.isHistory ||
+      a.assignmentStatus === 'COMPLETED' ||
+      a.assignmentStatus === 'UNABLE_TO_COMPLETE',
+  );
+}
+
+/**
+ * Canonical State Transition Machine
+ * SRS v1.1 & Figma State Authority
+ */
+export const ALLOWED_STATUS_TRANSITIONS: Record<AssignmentStatus, AssignmentStatus[]> = {
+  ASSIGNED: ['ACCEPTED', 'UNABLE_TO_COMPLETE'],
+  ACCEPTED: ['EN_ROUTE', 'ARRIVED', 'IN_PROGRESS', 'UNABLE_TO_COMPLETE'],
+  EN_ROUTE: ['ARRIVED', 'IN_PROGRESS', 'UNABLE_TO_COMPLETE'],
+  ARRIVED: ['IN_PROGRESS', 'UNABLE_TO_COMPLETE'],
+  IN_PROGRESS: ['COMPLETED', 'UNABLE_TO_COMPLETE'],
+  COMPLETED: [],
+  UNABLE_TO_COMPLETE: [],
+  INCIDENT_REPORTED: ['COMPLETED', 'UNABLE_TO_COMPLETE'],
+};
+
+export function getAllowedNextAssignmentStatuses(
+  currentStatus: AssignmentStatus,
+): AssignmentStatus[] {
+  return ALLOWED_STATUS_TRANSITIONS[currentStatus] || [];
+}
+
+export function canTransitionAssignmentStatus(
+  from: AssignmentStatus,
+  to: AssignmentStatus,
+): boolean {
+  const allowed = ALLOWED_STATUS_TRANSITIONS[from];
+  return Array.isArray(allowed) && allowed.includes(to);
+}
+
+export function updateStaffAssignmentStatus(
+  idOrRef: string,
+  newStatus: AssignmentStatus,
+  note?: string,
+): { success: boolean; assignment?: StaffAssignment; error?: string } {
+  const index = liveStaffAssignments.findIndex(
+    (a) => a.id === idOrRef || a.bookingReference === idOrRef,
+  );
+  if (index === -1) {
+    return { success: false, error: `Assignment not found for identifier "${idOrRef}"` };
+  }
+
+  const current = liveStaffAssignments[index];
+  if (!canTransitionAssignmentStatus(current.assignmentStatus, newStatus)) {
+    return {
+      success: false,
+      error: `Illegal status transition from "${current.assignmentStatus}" to "${newStatus}"`,
+    };
+  }
+
+  const updatedNotes = note ? [...(current.notes || []), note] : current.notes;
+  const isNowHistory = newStatus === 'COMPLETED' || newStatus === 'UNABLE_TO_COMPLETE';
+
+  liveStaffAssignments[index] = {
+    ...current,
+    assignmentStatus: newStatus,
+    notes: updatedNotes,
+    isHistory: isNowHistory ? true : current.isHistory,
+  };
+
+  notifyStaff();
+  return { success: true, assignment: liveStaffAssignments[index] };
+}
+
+export function getAllStaffIssueReports(): StaffIssueReport[] {
+  return [...liveStaffIssueReports];
+}
+
+export function getStaffIssueReportsByAssignment(assignmentId: string): StaffIssueReport[] {
+  return liveStaffIssueReports.filter((r) => r.assignmentId === assignmentId);
+}
+
+export function addStaffIssueReport(
+  report: Omit<StaffIssueReport, 'id' | 'timestamp'> & { id?: string; timestamp?: string },
+): StaffIssueReport {
+  const newReport: StaffIssueReport = {
+    id: report.id || `rpt-staff-${Date.now()}`,
+    timestamp: report.timestamp || new Date().toISOString(),
+    ...report,
+  };
+
+  liveStaffIssueReports = [newReport, ...liveStaffIssueReports];
+
+  // If issue outcome is UNABLE_TO_COMPLETE, transition the assignment
+  if (report.assignmentOutcome === 'UNABLE_TO_COMPLETE') {
+    const asg = getStaffAssignmentById(report.assignmentId);
+    if (asg && asg.assignmentStatus !== 'UNABLE_TO_COMPLETE') {
+      updateStaffAssignmentStatus(
+        asg.id,
+        'UNABLE_TO_COMPLETE',
+        `Reported issue: ${report.description}`,
+      );
+    }
+  }
+
+  notifyStaff();
+  return newReport;
+}
+
+export function resetStaffState(): void {
+  liveStaffAssignments = [...sampleStaffAssignments];
+  liveStaffIssueReports = [...sampleStaffIssueReports];
+  notifyStaff();
+}

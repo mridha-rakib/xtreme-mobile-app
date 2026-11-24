@@ -796,6 +796,169 @@ export function CustomerBottomNav({
 }
 
 /**
+ * StaffBottomNav Component - Faithful reproduction of Figma Node 71:28
+ * 2 tabs: 'Assignments' and 'History'
+ */
+export type StaffNavTab = 'Assignments' | 'History';
+
+export function StaffBottomNav({
+  activeTab = 'Assignments',
+  onTabPress,
+  bottomInset = 0,
+}: {
+  activeTab?: StaffNavTab;
+  onTabPress?: (tab: StaffNavTab) => void;
+  bottomInset?: number;
+}) {
+  const tabs: Array<{ id: StaffNavTab; label: string }> = [
+    { id: 'Assignments', label: 'Assignments' },
+    { id: 'History', label: 'History' },
+  ];
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#FFFFFF',
+        borderTopWidth: 1,
+        borderTopColor: '#DDD8CF',
+        paddingBottom: Math.max(bottomInset, 4),
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          height: 48,
+          alignItems: 'center',
+        }}
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 48,
+              }}
+              onPress={() => onTabPress?.(tab.id)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`${tab.label} tab`}
+            >
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: isActive ? '700' : '600',
+                  color: isActive ? '#0B0C0E' : '#5B616B',
+                  letterSpacing: 0.15,
+                }}
+              >
+                {tab.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * StaffStatusBadge Component - Faithful reproduction of Figma Node 20:276 (Status/Assignment)
+ */
+export function StaffStatusBadge({ status, style }: { status: string; style?: ViewStyle }) {
+  const normalized = (status || '').toUpperCase().replace(/\s+/g, '_');
+  let bg = '#EEE9E0';
+  let textColor = '#0B0C0E';
+  let label = 'ASSIGNED';
+
+  switch (normalized) {
+    case 'ACCEPTED':
+      bg = '#E8F0F8';
+      textColor = '#2F5E8D';
+      label = 'ACCEPTED';
+      break;
+    case 'EN_ROUTE':
+      bg = '#DDEBEC';
+      textColor = '#164D53';
+      label = 'EN ROUTE';
+      break;
+    case 'ARRIVED':
+      bg = '#E1F5FE';
+      textColor = '#0277BD';
+      label = 'ARRIVED';
+      break;
+    case 'IN_PROGRESS':
+      bg = '#E8F0F8';
+      textColor = '#2F5E8D';
+      label = 'IN PROGRESS';
+      break;
+    case 'COMPLETED':
+      bg = '#E6F2EC';
+      textColor = '#2E7D32';
+      label = 'COMPLETED';
+      break;
+    case 'UNABLE_TO_COMPLETE':
+      bg = '#F9E6E6';
+      textColor = '#C62828';
+      label = 'UNABLE TO COMPLETE';
+      break;
+    case 'INCIDENT_REPORTED':
+      bg = '#FFF3E0';
+      textColor = '#E65100';
+      label = 'INCIDENT REPORTED';
+      break;
+    default:
+      bg = '#EEE9E0';
+      textColor = '#0B0C0E';
+      label = 'ASSIGNED';
+      break;
+  }
+
+  return (
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: bg,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          borderRadius: 999,
+          gap: 6,
+        },
+        style,
+      ]}
+    >
+      <View
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: textColor,
+        }}
+      />
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: '600',
+          color: textColor,
+          letterSpacing: 0.15,
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/**
  * BrandLogo Component - Faithfully replicates the approved Figma badge.
  *
  * BRANDING SPECIFICATION COMPLIANCE NOTE:

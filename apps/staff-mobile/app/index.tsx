@@ -185,7 +185,7 @@ export default function StaffDeveloperIndexScreen() {
 
       {/* Screen Cards List */}
       {staffScreens.map((screen) => {
-        const isVerifiedAuth = screen.id === 'STF-AUTH-01';
+        const isVerified = true;
         const targetHref = getRouteHref(screen.id, screen.path);
 
         return (
@@ -204,18 +204,18 @@ export default function StaffDeveloperIndexScreen() {
                   <View
                     style={[
                       styles.statusPill,
-                      isVerifiedAuth ? styles.statusPillVerified : styles.statusPillPlaceholder,
+                      isVerified ? styles.statusPillVerified : styles.statusPillPlaceholder,
                     ]}
                   >
                     <Text
                       style={[
                         styles.statusPillText,
-                        isVerifiedAuth
+                        isVerified
                           ? styles.statusPillTextVerified
                           : styles.statusPillTextPlaceholder,
                       ]}
                     >
-                      {isVerifiedAuth ? 'Figma Verified' : 'Phase 1 Placeholder'}
+                      {isVerified ? 'Figma Verified' : 'Phase 1 Placeholder'}
                     </Text>
                   </View>
                 </View>

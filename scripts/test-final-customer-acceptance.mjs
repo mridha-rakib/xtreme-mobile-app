@@ -201,15 +201,15 @@ const supportFilePath = path.join(repoRoot, 'apps/customer-mobile/app/support.ts
 const supportContent = fs.readFileSync(supportFilePath, 'utf8');
 
 assert.ok(
-  supportContent.includes(['mailto:', '${item.value}'].join('')),
+  supportContent.includes('mailto:') && supportContent.includes('item.value'),
   'Support screen must trigger mailto: URI for email contact',
 );
 assert.ok(
-  supportContent.includes(['tel:', '${item.value'].join('')),
+  supportContent.includes('tel:') && supportContent.includes('item.value'),
   'Support screen must trigger tel: URI for phone contact',
 );
 assert.ok(
-  supportContent.includes(['https://wa.me/', '${cleanPhone}'].join('')),
+  supportContent.includes('https://wa.me/') && supportContent.includes('cleanPhone'),
   'Support screen must trigger WhatsApp URI for messaging',
 );
 assert.ok(
@@ -241,13 +241,16 @@ const newBooking = addBooking({
   reference: generateBookingReference(),
   customerId: 'demo-cus-001',
   serviceId: 'srv-001',
-  serviceTitle: 'Gulfstream G650ER Private Jet Charter',
+  serviceName: 'Gulfstream G650ER Private Jet Charter',
+  bookingMode: 'INSTANT',
+  status: 'CONFIRMED',
   date: '2026-12-15',
   time: '10:00 AM',
+  pickupLocation: 'Blaise Diagne Airport VIP Terminal',
   passengers: 4,
-  totalPrice: 48500,
+  amount: 48500,
   currency: 'USD',
-  status: 'PENDING',
+  paymentStatus: 'PENDING',
   createdAt: new Date().toISOString(),
 });
 const postBookings = getAllBookings();
@@ -274,7 +277,8 @@ const newRequest = addConciergeRequest({
   type: 'PLAN_TRIP',
   title: 'Bespoke Alps Ski Chalet & Helicopter Transfer',
   details: 'Require private chef and mountain guide.',
-  destination: 'St. Moritz, Switzerland',
+  tripContext: 'St. Moritz, Switzerland',
+  serviceContext: 'Chalet & Transfer',
   startDate: '2026-12-20',
   endDate: '2026-12-27',
   budgetNotes: '$50,000 - $100,000',

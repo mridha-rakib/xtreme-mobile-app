@@ -11,7 +11,3 @@ coverage/
 *.log
 *.local
 .pnpm-debug.log*
-.next/
-*.tsbuildinfo
-test-results/
-playwright-report/

@@ -9,12 +9,6 @@
   "scripts": {
     "customer": "pnpm --filter @xtreme/customer-mobile start",
     "staff": "pnpm --filter @xtreme/staff-mobile start",
-    "admin": "pnpm --filter @xtreme/command-center-web dev",
-    "admin:build": "pnpm --filter @xtreme/command-center-web build",
-    "admin:start": "pnpm --filter @xtreme/command-center-web start",
-    "admin:typecheck": "pnpm --filter @xtreme/command-center-web typecheck",
-    "test:admin": "pnpm --filter @xtreme/command-center-web test",
-    "test:admin:e2e": "pnpm --filter @xtreme/command-center-web test:e2e",
     "lint": "biome lint .",
     "check": "biome check .",
     "check:fix": "biome check --write .",

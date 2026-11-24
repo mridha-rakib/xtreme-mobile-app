@@ -12,7 +12,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-CON-05"
+        eyebrow="CONCIERGE CONVERSATION"
         title="Concierge Dialogue"
         subtitle={`Conversation ID: ${activeConvId}`}
         onBack={() => router.back()}

@@ -18,7 +18,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-PAY-01"
+        eyebrow="PAYMENT METHOD"
         title="Payment Method"
         subtitle="Approved Mobile MVP Stripe Payment Model"
         onBack={() => router.back()}

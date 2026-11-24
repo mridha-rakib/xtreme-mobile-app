@@ -11,7 +11,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-BKG-02"
+        eyebrow="RESERVATION"
         title="Availability Selection"
         subtitle={`Service ID: ${serviceId}`}
         onBack={() => router.back()}

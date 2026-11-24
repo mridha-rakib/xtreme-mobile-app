@@ -16,7 +16,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="STF-ASG-03"
+        eyebrow="STATUS UPDATE"
         title="Update Status"
         subtitle={`Assignment ID: ${assignmentId}`}
         onBack={() => router.back()}

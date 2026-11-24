@@ -32,7 +32,11 @@ export default function Screen() {
 
   return (
     <ScreenContainer>
-      <Header eyebrow="CUS-BKG-04" title="Booking Submitted" subtitle={`Reference: ${reference}`} />
+      <Header
+        eyebrow="BOOKING CONFIRMATION"
+        title="Booking Submitted"
+        subtitle={`Reference: ${reference}`}
+      />
 
       <View style={styles.card}>
         <DetailRow label="Payment Status" value={<StatusBadge status={paymentStatus} />} />

@@ -1,28 +1,34 @@
-import { palette } from '@xtreme/ui';
+import { Header, palette } from '@xtreme/ui';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
 /** CUS-TRIP-01 — My Trips. Placeholder until exact Figma layer/assets are available. */
 export default function Screen() {
   const router = useRouter();
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/discover' as never);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>TRIPS</Text>
-      <Text style={styles.title}>My Trips</Text>
+      <Header
+        eyebrow="TRIPS"
+        title="My Trips"
+        subtitle="Manage upcoming journeys and itinerary schedules"
+        onBack={handleBack}
+      />
       <Text style={styles.note}>
         Frontend preview route only. No API calls, payments, or user data.
       </Text>
-      <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.button}>
-        <Text style={styles.buttonText}>Back</Text>
-      </Pressable>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: palette.background, padding: 24, gap: 16 },
-  eyebrow: { fontSize: 13, color: palette.muted },
-  title: { fontSize: 29, fontWeight: '700', color: palette.ink },
   note: { fontSize: 15, color: palette.muted, lineHeight: 24 },
-  button: { padding: 16, backgroundColor: palette.ink, borderRadius: 12, alignItems: 'center' },
-  buttonText: { color: '#FFFFFF', fontWeight: '700' },
 });

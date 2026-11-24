@@ -29,6 +29,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 const logoAsset = require('./assets/logo.png');
 
@@ -82,15 +83,20 @@ export function MockAuthProvider({
   initialDemoMode?: boolean;
 }) {
   const isDevBuild = typeof __DEV__ !== 'undefined' && __DEV__;
-  // Security rule: demo bypass can only exist in DEV/preview builds
-  const [isDemoMode, setIsDemoModeState] = useState(isDevBuild ? initialDemoMode : false);
+  const isExplicitPreview =
+    process.env.EXPO_PUBLIC_APP_VARIANT === 'preview' ||
+    process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
+  const isDemoPermitted = isDevBuild || isExplicitPreview;
+
+  // Security rule: demo bypass can only exist in DEV or explicit preview builds
+  const [isDemoMode, setIsDemoModeState] = useState(isDemoPermitted ? initialDemoMode : false);
   const [isAuthenticated, setIsAuthenticated] = useState(initialAuthenticated);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(initialUser);
   const [activePersona, setActivePersona] = useState<DemoPersona>('customer');
   const [scenario, setScenarioState] = useState<DemoScenario>('success');
 
   const setDemoMode = (enabled: boolean) => {
-    if (isDevBuild) {
+    if (isDemoPermitted) {
       setIsDemoModeState(enabled);
     }
   };
@@ -130,7 +136,7 @@ export function MockAuthProvider({
     setCurrentUser(null);
     setActivePersona('customer');
     setScenarioState('success');
-    if (isDevBuild) {
+    if (isDemoPermitted) {
       setIsDemoModeState(true);
     }
   };
@@ -280,6 +286,69 @@ export function ScreenCard({ title, subtitle, badge, onPress, style }: ScreenCar
 }
 
 /**
+ * ArrowLeftIcon - Approved Vector Navigation Asset (Figma 264:229 / SimpleDS ArrowLeft)
+ */
+export interface ArrowLeftIconProps {
+  size?: number;
+  color?: string;
+  strokeWidth?: number;
+}
+
+export function ArrowLeftIcon({
+  size = 20,
+  color = '#164D53',
+  strokeWidth = 2,
+}: ArrowLeftIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M19 12H5M12 19l-7-7 7-7"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/**
+ * BackButton - Approved Icon-Only Directional Navigation Control (Figma 1048:14367 & 14:79)
+ * - True vector icon (no Unicode characters).
+ * - Proper accessibilityRole="button" and accessibilityLabel="Go back".
+ * - Generous touch target with hitSlop.
+ */
+export interface BackButtonProps {
+  onPress?: () => void;
+  style?: ViewStyle;
+  variant?: 'circle' | 'minimal';
+  accessibilityLabel?: string;
+}
+
+export function BackButton({
+  onPress,
+  style,
+  variant = 'circle',
+  accessibilityLabel = 'Go back',
+}: BackButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        variant === 'circle' ? styles.backButtonCircle : styles.backButtonMinimal,
+        pressed && styles.backButtonPressed,
+        style,
+      ]}
+    >
+      <ArrowLeftIcon size={18} color="#164D53" strokeWidth={2.2} />
+    </Pressable>
+  );
+}
+
+/**
  * Header / Navigation Bar Component
  */
 export interface HeaderProps {
@@ -296,10 +365,9 @@ export function Header({ title, subtitle, eyebrow, onBack, rightAction }: Header
   return (
     <View style={styles.header}>
       {onBack ? (
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backButtonChevron}>‹</Text>
-          <Text style={styles.backButtonText}>Back</Text>
-        </Pressable>
+        <View style={styles.headerBackRow}>
+          <BackButton onPress={onBack} />
+        </View>
       ) : null}
       {cleanEyebrow ? <Text style={styles.eyebrow}>{cleanEyebrow}</Text> : null}
       <View style={styles.headerRow}>
@@ -1681,5 +1749,37 @@ const styles = StyleSheet.create({
     height: 1.4,
     backgroundColor: '#A6A19A',
     transform: [{ rotate: '45deg' }],
+  },
+  // BackButton & Vector Navigation Styles
+  backButtonCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  backButtonMinimal: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonPressed: {
+    opacity: 0.7,
+    backgroundColor: '#F3EFE6',
+  },
+  headerBackRow: {
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

@@ -17,7 +17,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-BKG-01"
+        eyebrow="RESERVATION"
         title="Booking Input"
         subtitle={`Service: ${service.name}`}
         onBack={() => router.back()}

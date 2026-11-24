@@ -18,7 +18,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-PAY-03"
+        eyebrow="PAYMENT STATUS"
         title="Payment Receipt"
         subtitle="Stripe Transaction Status"
         onBack={() => router.back()}

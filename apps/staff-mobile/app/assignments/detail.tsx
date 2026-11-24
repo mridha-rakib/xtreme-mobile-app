@@ -24,7 +24,11 @@ export default function Screen() {
   if (!asg) {
     return (
       <ScreenContainer>
-        <Header eyebrow="STF-ASG-02" title="Assignment Detail" onBack={() => router.back()} />
+        <Header
+          eyebrow="ASSIGNMENT DETAIL"
+          title="Assignment Detail"
+          onBack={() => router.back()}
+        />
         <NotFoundCard
           resourceName="Assignment"
           resourceId={activeId}
@@ -37,7 +41,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="STF-ASG-02"
+        eyebrow="ASSIGNMENT DETAIL"
         title={asg.title}
         subtitle={`Ref: ${asg.bookingReference}`}
         onBack={() => router.back()}

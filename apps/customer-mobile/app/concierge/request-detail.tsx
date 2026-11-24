@@ -24,7 +24,11 @@ export default function Screen() {
   if (!req) {
     return (
       <ScreenContainer>
-        <Header eyebrow="CUS-CON-03" title="Concierge Request" onBack={() => router.back()} />
+        <Header
+          eyebrow="CONCIERGE REQUEST"
+          title="Concierge Request"
+          onBack={() => router.back()}
+        />
         <NotFoundCard
           resourceName="Concierge Request"
           resourceId={activeRequestId}
@@ -37,7 +41,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-CON-03"
+        eyebrow="CONCIERGE REQUEST"
         title={req.title}
         subtitle={`Ref: ${req.reference}`}
         onBack={() => router.back()}

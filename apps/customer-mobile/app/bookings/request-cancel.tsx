@@ -13,7 +13,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-CHG-02"
+        eyebrow="CANCELLATION REQUEST"
         title="Cancel Booking"
         subtitle={`Booking: ${booking.reference}`}
         onBack={() => router.back()}

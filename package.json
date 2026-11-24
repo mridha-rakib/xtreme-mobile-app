@@ -18,7 +18,8 @@
     "prepare": "husky",
     "test:routes": "node scripts/validate-routes.mjs",
     "test:demo": "node scripts/test-demo-mode.mjs",
-    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs"
+    "test:branding": "node scripts/test-branding-acceptance.mjs",
+    "test": "node scripts/validate-routes.mjs && node scripts/test-demo-mode.mjs && node scripts/test-branding-acceptance.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
@@ -34,5 +35,8 @@
     "*.md": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "react-native-svg": "^15.16.1"
   }
 }

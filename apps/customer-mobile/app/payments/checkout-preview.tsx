@@ -17,7 +17,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-PAY-02"
+        eyebrow="CHECKOUT"
         title="Stripe Card Payment"
         subtitle="Simulated Stripe PaymentSheet"
         onBack={() => router.back()}

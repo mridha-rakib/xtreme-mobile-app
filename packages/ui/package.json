@@ -19,7 +19,8 @@
     "expo-status-bar": "*",
     "react": "*",
     "react-native": "*",
-    "react-native-safe-area-context": "*"
+    "react-native-safe-area-context": "*",
+    "react-native-svg": "*"
   },
   "devDependencies": {
     "@types/react": "~19.3.0",

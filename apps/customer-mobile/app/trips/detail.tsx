@@ -14,7 +14,7 @@ export default function Screen() {
   if (!trip) {
     return (
       <ScreenContainer>
-        <Header eyebrow="CUS-TRIP-02" title="Trip Detail" onBack={() => router.back()} />
+        <Header eyebrow="TRIP DETAIL" title="Trip Detail" onBack={() => router.back()} />
         <NotFoundCard
           resourceName="Trip"
           resourceId={activeTripId}
@@ -27,7 +27,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-TRIP-02"
+        eyebrow="TRIP DETAIL"
         title={trip.title}
         subtitle={`Ref: ${trip.reference}`}
         onBack={() => router.back()}

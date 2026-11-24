@@ -2,9 +2,14 @@ import { DEFAULT_DEMO_IDS } from '@xtreme/mock-data';
 import { staffScreens } from '@xtreme/navigation';
 import type { DemoPersona, DemoScenario } from '@xtreme/types';
 import { radii, shadows, useMockAuth } from '@xtreme/ui';
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+const isPreview =
+  process.env.EXPO_PUBLIC_APP_VARIANT === 'preview' || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
+const isDemoAllowed = isDev || isPreview;
 
 function getRouteHref(screenId: string, basePath: string): string {
   switch (screenId) {
@@ -40,6 +45,11 @@ export default function StaffDeveloperIndexScreen() {
     logout,
     resetDemoState,
   } = useMockAuth();
+
+  // In production builds, redirect straight to staff sign-in
+  if (!isDemoAllowed) {
+    return <Redirect href="/auth/sign-in" />;
+  }
 
   return (
     <ScrollView

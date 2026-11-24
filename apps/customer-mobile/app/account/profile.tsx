@@ -25,7 +25,7 @@ export default function Screen() {
   return (
     <ScreenContainer>
       <Header
-        eyebrow="CUS-PRO-01"
+        eyebrow="ACCOUNT"
         title="Client Profile"
         subtitle={isAuthenticated ? 'Active Mock Session' : 'Signed Out'}
         onBack={() => router.back()}

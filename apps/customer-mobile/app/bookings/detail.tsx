@@ -164,7 +164,13 @@ export default function BookingDetailScreen() {
             accessibilityLabel="Request modification"
           >
             <Text style={styles.contextLabel}>Change request</Text>
-            <Text style={styles.contextValue}>Current request ›</Text>
+            <Text style={styles.contextValue}>
+              {booking.cancellationRequest
+                ? `Cancellation: ${booking.cancellationRequest.status} ›`
+                : booking.modificationRequest
+                  ? `Modification: ${booking.modificationRequest.status} ›`
+                  : 'Current request ›'}
+            </Text>
           </Pressable>
 
           {/* Row 4: Assignment / trip */}

@@ -1,4 +1,5 @@
 import {
+  convertFromBaseXof,
   getAllBookings,
   getBookingById,
   updateBooking,
@@ -12,6 +13,7 @@ import {
   NavHomeIcon,
   NavProfileIcon,
   NotFoundCard,
+  useMockAuth,
 } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -27,12 +29,14 @@ const logoHeader = require('../../assets/logo.png');
 export default function CheckoutPreviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { scenario } = useMockAuth();
   const params = useLocalSearchParams<{
     bookingId?: string;
     id?: string;
     purpose?: PaymentPurpose;
     currency?: CurrencyCode;
     amount?: string;
+    baseAmountXof?: string;
   }>();
 
   const activeBookingId = params.bookingId || params.id;
@@ -46,18 +50,23 @@ export default function CheckoutPreviewScreen() {
 
   const purpose: PaymentPurpose = params.purpose || booking?.paymentPurpose || 'FULL';
   const currency: CurrencyCode = params.currency || booking?.currency || 'XOF';
-  const displayAmount = params.amount
-    ? Number.parseInt(params.amount, 10)
+
+  const baseAmountXof = params.baseAmountXof
+    ? Number.parseInt(params.baseAmountXof, 10)
     : purpose === 'DEPOSIT'
       ? Math.round((booking?.amount || 95000) * 0.5)
       : purpose === 'BALANCE'
         ? Math.round((booking?.amount || 95000) * 0.5)
         : booking?.amount || 95000;
 
-  // QA test simulation scenario state
-  const [simulationScenario, setSimulationScenario] = useState<
-    'success' | 'failure' | 'processing'
-  >('success');
+  const {
+    amount: displayAmount,
+    rate,
+    isConverted,
+  } = useMemo(() => {
+    return convertFromBaseXof(baseAmountXof, currency);
+  }, [baseAmountXof, currency]);
+
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCompleteAction = () => {
@@ -65,10 +74,11 @@ export default function CheckoutPreviewScreen() {
 
     setIsProcessing(true);
 
+    // Derive mock payment outcome from isolated QA scenario (never customer-facing)
     let resolvedPaymentStatus: PaymentStatus = 'SUCCEEDED';
-    if (simulationScenario === 'failure') {
+    if (scenario === 'failure') {
       resolvedPaymentStatus = 'FAILED';
-    } else if (simulationScenario === 'processing') {
+    } else if (scenario === 'pending') {
       resolvedPaymentStatus = 'PROCESSING';
     }
 
@@ -187,10 +197,11 @@ export default function CheckoutPreviewScreen() {
           <Text style={styles.detailLabel}>Amount / currency</Text>
           <Text style={styles.detailValue}>
             {displayAmount.toLocaleString()} {currency}
+            {isConverted && ` (Ref: 1 ${currency} = ${rate} XOF)`}
           </Text>
         </View>
 
-        {/* Provider UI Card matching Figma 52:849 */}
+        {/* Provider UI Card matching Figma 52:849 (Zero QA switches in customer UI) */}
         <View style={styles.providerCard}>
           <View style={styles.providerCardHeader}>
             <Text style={styles.providerLabel}>Payment method / provider UI</Text>
@@ -202,65 +213,7 @@ export default function CheckoutPreviewScreen() {
             <Text style={styles.cardNumberText}>•••• •••• •••• 4242</Text>
             <Text style={styles.cardExpiryText}>12/28</Text>
           </View>
-
-          {/* QA Simulation Switcher */}
-          <View style={styles.scenarioRow}>
-            <Text style={styles.scenarioLabel}>Scenario:</Text>
-            <Pressable
-              style={[
-                styles.scenarioChip,
-                simulationScenario === 'success' && styles.scenarioChipActive,
-              ]}
-              onPress={() => setSimulationScenario('success')}
-              accessibilityRole="button"
-              accessibilityLabel="Simulate Payment Success"
-            >
-              <Text
-                style={[
-                  styles.scenarioChipText,
-                  simulationScenario === 'success' && styles.scenarioChipTextActive,
-                ]}
-              >
-                Success
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.scenarioChip,
-                simulationScenario === 'failure' && styles.scenarioChipActive,
-              ]}
-              onPress={() => setSimulationScenario('failure')}
-              accessibilityRole="button"
-              accessibilityLabel="Simulate Payment Failure"
-            >
-              <Text
-                style={[
-                  styles.scenarioChipText,
-                  simulationScenario === 'failure' && styles.scenarioChipTextActive,
-                ]}
-              >
-                Fail
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.scenarioChip,
-                simulationScenario === 'processing' && styles.scenarioChipActive,
-              ]}
-              onPress={() => setSimulationScenario('processing')}
-              accessibilityRole="button"
-              accessibilityLabel="Simulate Payment Processing"
-            >
-              <Text
-                style={[
-                  styles.scenarioChipText,
-                  simulationScenario === 'processing' && styles.scenarioChipTextActive,
-                ]}
-              >
-                Processing
-              </Text>
-            </Pressable>
-          </View>
+          <Text style={styles.providerNote}>Simulated Stripe Mobile PaymentSheet</Text>
         </View>
 
         {/* Advisory Warning Banner matching Figma 52:851 */}
@@ -482,7 +435,7 @@ const styles = StyleSheet.create({
   providerCard: {
     marginHorizontal: 20,
     marginTop: 14,
-    height: 150,
+    height: 140,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DDD8CF',
@@ -532,33 +485,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#5B616B',
   },
-  scenarioRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  scenarioLabel: {
+  providerNote: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#5B616B',
-  },
-  scenarioChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: '#EEE9E0',
-  },
-  scenarioChipActive: {
-    backgroundColor: '#C6A15B',
-  },
-  scenarioChipText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#5B616B',
-  },
-  scenarioChipTextActive: {
-    color: '#FFFFFF',
+    textAlign: 'center',
   },
   warningBanner: {
     marginHorizontal: 20,

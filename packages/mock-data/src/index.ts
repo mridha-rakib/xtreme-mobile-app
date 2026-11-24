@@ -12,6 +12,7 @@ import type {
   ConciergeConversation,
   ConciergeMessage,
   ConciergeRequestRecord,
+  CurrencyCode,
   ServiceCategory,
   ServiceItem,
   ServiceLocation,
@@ -472,6 +473,63 @@ export function updateBooking(
   return liveBookings[index];
 }
 
+export function resolveCancellationRequest(
+  bookingId: string,
+  resolution: 'APPROVED' | 'REJECTED',
+): BookingRecord | undefined {
+  const booking = getBookingById(bookingId);
+  if (!booking?.cancellationRequest) return undefined;
+
+  const updatedCancellation = {
+    ...booking.cancellationRequest,
+    status: resolution,
+  };
+
+  const updatedStatus = resolution === 'APPROVED' ? 'CANCELLED' : booking.status;
+  return updateBooking(bookingId, {
+    status: updatedStatus,
+    cancellationRequest: updatedCancellation,
+  });
+}
+
+export function resolveModificationRequest(
+  bookingId: string,
+  resolution: 'APPROVED' | 'REJECTED',
+): BookingRecord | undefined {
+  const booking = getBookingById(bookingId);
+  if (!booking?.modificationRequest) return undefined;
+
+  const updatedMod = {
+    ...booking.modificationRequest,
+    status: resolution,
+  };
+
+  return updateBooking(bookingId, {
+    modificationRequest: updatedMod,
+  });
+}
+
+export const EXCHANGE_RATES_TO_XOF = {
+  XOF: 1,
+  EUR: 655.957,
+  USD: 610.0,
+} as const;
+
+export function convertFromBaseXof(
+  baseAmountXof: number,
+  targetCurrency: CurrencyCode,
+): { amount: number; rate: number; isConverted: boolean } {
+  if (targetCurrency === 'XOF') {
+    return { amount: baseAmountXof, rate: 1, isConverted: false };
+  }
+  const rate = EXCHANGE_RATES_TO_XOF[targetCurrency as keyof typeof EXCHANGE_RATES_TO_XOF] || 1;
+  return {
+    amount: Math.round(baseAmountXof / rate),
+    rate,
+    isConverted: true,
+  };
+}
+
 export function resetBookings(): void {
   liveBookings = [...sampleBookings];
   bookingReferenceSequence = 85;
@@ -533,16 +591,76 @@ export const sampleTrips: TripItinerary[] = [
 export const sampleConciergeRequests: ConciergeRequestRecord[] = [
   {
     id: 'req-con-001',
-    reference: 'REQ-CON-2026-019',
+    reference: 'CR-2026-9042',
     customerId: 'demo-cus-001',
-    title: 'Private Helicopter Tour over Lake Retba & Desert Dunes',
+    title: 'Concierge Request 1',
+    type: 'PLAN_TRIP',
     details:
-      'Looking for a private helicopter charter for 3 persons on Saturday morning, followed by champagne lunch near Lac Rose.',
+      'VIP helicopter flight over Lake Retba (Lac Rose) and Atlantic coastline dunes with champagne lunch reception.',
+    tripContext: 'Senegal Atlantic Heritage',
+    serviceContext: 'Air Charter & Excursions',
     startDate: '2026-12-08',
     guestCount: 3,
-    budgetNotes: 'Flexible, premium standard',
-    status: 'PROPOSAL_READY',
-    createdAt: '2026-11-21T14:30:00Z',
+    budgetNotes: 'Flexible, premium luxury tier',
+    status: 'OPEN',
+    createdAt: '2026-11-24T09:30:00Z',
+    updatedAt: '2026-11-24T09:30:00Z',
+    conversationId: 'conv-demo-001',
+  },
+  {
+    id: 'req-con-002',
+    reference: 'CR-2026-9043',
+    customerId: 'demo-cus-001',
+    title: 'Concierge Request 2',
+    type: 'VIP_TRANSPORT',
+    details:
+      'Executive armored escort and presidential protocol motorcade from Blaise Diagne VIP Terminal to Dakar Plateau.',
+    tripContext: 'Dakar Business Summit',
+    serviceContext: 'Diplomatic & Close Protection',
+    startDate: '2026-12-05',
+    guestCount: 2,
+    budgetNotes: 'Full executive security package',
+    status: 'IN_PROGRESS',
+    createdAt: '2026-11-23T14:15:00Z',
+    updatedAt: '2026-11-24T08:00:00Z',
+    conversationId: 'conv-demo-002',
+  },
+  {
+    id: 'req-con-003',
+    reference: 'CR-2026-9044',
+    customerId: 'demo-cus-001',
+    title: 'Concierge Request 3',
+    type: 'VILLA_BOOKING',
+    details:
+      'Private 5-bedroom waterfront villa reservation in Somone Lagoon with private chef, butler, and oceanfront infinity pool.',
+    tripContext: 'Somone Lagoon Retreat',
+    serviceContext: 'Private Villa & Lifestyle',
+    startDate: '2026-11-18',
+    endDate: '2026-11-22',
+    guestCount: 6,
+    budgetNotes: 'Bespoke estate booking',
+    status: 'COMPLETED',
+    createdAt: '2026-11-18T11:00:00Z',
+    updatedAt: '2026-11-22T17:00:00Z',
+    conversationId: 'conv-demo-003',
+  },
+  {
+    id: 'req-con-004',
+    reference: 'CR-2026-9045',
+    customerId: 'demo-cus-001',
+    title: 'Concierge Request 4',
+    type: 'EVENT_PLANNING',
+    details:
+      'Sunset catamaran yacht charter around Île de Gorée with acoustic live kora performance and tasting menu.',
+    tripContext: 'Gorée Cultural Evening',
+    serviceContext: 'Private Yacht Charter',
+    startDate: '2026-11-15',
+    guestCount: 4,
+    budgetNotes: 'Private charter budget',
+    status: 'CANCELLED',
+    createdAt: '2026-11-15T16:20:00Z',
+    updatedAt: '2026-11-16T10:00:00Z',
+    conversationId: 'conv-demo-004',
   },
 ];
 
@@ -550,11 +668,57 @@ export const sampleConversations: ConciergeConversation[] = [
   {
     id: 'conv-demo-001',
     requestId: 'req-con-001',
-    subject: 'Helicopter Charter & Lac Rose Excursion',
+    subject: 'Concierge Conversation',
     lastMessageSnippet:
       'Bonjour Monsieur Diop, the flight clearance for Lac Rose is confirmed for 10:30 AM.',
-    lastUpdated: '2026-11-22T15:20:00Z',
+    lastUpdated: '10:24',
     unreadCount: 1,
+    status: 'NEW',
+  },
+  {
+    id: 'conv-demo-002',
+    requestId: 'req-con-002',
+    subject: 'Concierge Conversation',
+    lastMessageSnippet:
+      'Diplomatic protocol clearance granted. Close protection officers assigned.',
+    lastUpdated: '09:15',
+    unreadCount: 1,
+    status: 'NEW',
+  },
+  {
+    id: 'conv-demo-003',
+    requestId: 'req-con-003',
+    subject: 'Concierge Conversation',
+    lastMessageSnippet: 'Chef menu approved. Butler awaiting your arrival at Somone Lagoon Villa.',
+    lastUpdated: 'Yesterday',
+    unreadCount: 0,
+    status: 'READ',
+  },
+  {
+    id: 'conv-demo-004',
+    requestId: 'req-con-004',
+    subject: 'Concierge Conversation',
+    lastMessageSnippet:
+      'Catamaran booking cancelled per your instruction. Deposit refund processed.',
+    lastUpdated: 'Nov 16',
+    unreadCount: 0,
+    status: 'READ',
+  },
+  {
+    id: 'conv-demo-005',
+    subject: 'Concierge Conversation',
+    lastMessageSnippet: 'Front row VIP lounge passes secured for Dakar Fashion Gala.',
+    lastUpdated: 'Nov 14',
+    unreadCount: 0,
+    status: 'READ',
+  },
+  {
+    id: 'conv-demo-006',
+    subject: 'Concierge Conversation',
+    lastMessageSnippet: 'Oceanfront sunset terrace table confirmed at L’Alkimia Almadies.',
+    lastUpdated: 'Nov 12',
+    unreadCount: 0,
+    status: 'READ',
   },
 ];
 
@@ -562,24 +726,133 @@ export const sampleMessages: ConciergeMessage[] = [
   {
     id: 'msg-001',
     conversationId: 'conv-demo-001',
-    senderId: 'demo-cus-001',
-    senderName: 'Amadou Diop',
-    isStaff: false,
+    senderId: 'staff-ops-001',
+    senderName: 'Concierge',
+    isStaff: true,
     content:
-      'Bonjour, could you check availability for an Airbus H130 helicopter for this Saturday morning?',
-    timestamp: '2026-11-21T15:00:00Z',
+      'Bonjour! How can our lifestyle management team assist with your upcoming itinerary in Dakar?',
+    timestamp: '10:20',
   },
   {
     id: 'msg-002',
     conversationId: 'conv-demo-001',
+    senderId: 'demo-cus-001',
+    senderName: 'You',
+    isStaff: false,
+    content:
+      'Could you arrange a private helicopter flight to Lac Rose and desert dunes this weekend?',
+    timestamp: '10:21',
+  },
+  {
+    id: 'msg-003',
+    conversationId: 'conv-demo-001',
     senderId: 'staff-ops-001',
-    senderName: 'Fatou (XTREME Concierge)',
+    senderName: 'Concierge',
     isStaff: true,
     content:
-      'Bonjour Monsieur Diop, we are finalizing the private helipad authorization near Lac Rose. The departure is set for 10:30 AM from Blaise Diagne.',
-    timestamp: '2026-11-22T15:20:00Z',
+      'Certainly. We have Airbus H130 availability departing directly from DSS VIP Pavilion.',
+    timestamp: '10:22',
+  },
+  {
+    id: 'msg-004',
+    conversationId: 'conv-demo-001',
+    senderId: 'demo-cus-001',
+    senderName: 'You',
+    isStaff: false,
+    content: 'Perfect, please include champagne lunch on the private dunes for 3 guests.',
+    timestamp: '10:23',
+  },
+  {
+    id: 'msg-005',
+    conversationId: 'conv-demo-001',
+    senderId: 'staff-ops-001',
+    senderName: 'Concierge',
+    isStaff: true,
+    content: 'Noted with pleasure! Flight clearance for Lac Rose is confirmed for 10:30 AM.',
+    timestamp: '10:24',
   },
 ];
+
+/**
+ * Live Frontend Concierge Repositories
+ */
+let liveConciergeRequests: ConciergeRequestRecord[] = [...sampleConciergeRequests];
+let liveConversations: ConciergeConversation[] = [...sampleConversations];
+let liveMessages: ConciergeMessage[] = [...sampleMessages];
+let conciergeRefSeq = 45;
+
+export function getAllConciergeRequests(): ConciergeRequestRecord[] {
+  return [...liveConciergeRequests];
+}
+
+export function getConciergeRequestById(idOrRef: string): ConciergeRequestRecord | undefined {
+  return liveConciergeRequests.find((r) => r.id === idOrRef || r.reference === idOrRef);
+}
+
+export function generateConciergeReference(): string {
+  const seq = ++conciergeRefSeq;
+  return `CR-2026-${String(seq).padStart(4, '0')}`;
+}
+
+export function addConciergeRequest(request: ConciergeRequestRecord): ConciergeRequestRecord {
+  liveConciergeRequests = [request, ...liveConciergeRequests.filter((r) => r.id !== request.id)];
+  return request;
+}
+
+export function updateConciergeRequest(
+  idOrRef: string,
+  partial: Partial<ConciergeRequestRecord>,
+): ConciergeRequestRecord | undefined {
+  const index = liveConciergeRequests.findIndex((r) => r.id === idOrRef || r.reference === idOrRef);
+  if (index === -1) return undefined;
+  liveConciergeRequests[index] = { ...liveConciergeRequests[index], ...partial };
+  return liveConciergeRequests[index];
+}
+
+export function getAllConversations(): ConciergeConversation[] {
+  return [...liveConversations];
+}
+
+export function getConversationById(id: string): ConciergeConversation | undefined {
+  return liveConversations.find((c) => c.id === id);
+}
+
+export function addConversation(conv: ConciergeConversation): ConciergeConversation {
+  liveConversations = [conv, ...liveConversations.filter((c) => c.id !== conv.id)];
+  return conv;
+}
+
+export function updateConversation(
+  id: string,
+  partial: Partial<ConciergeConversation>,
+): ConciergeConversation | undefined {
+  const index = liveConversations.findIndex((c) => c.id === id);
+  if (index === -1) return undefined;
+  liveConversations[index] = { ...liveConversations[index], ...partial };
+  return liveConversations[index];
+}
+
+export function getMessagesByConversationId(conversationId: string): ConciergeMessage[] {
+  return liveMessages.filter((m) => m.conversationId === conversationId);
+}
+
+export function addMessage(msg: ConciergeMessage): ConciergeMessage {
+  liveMessages = [...liveMessages, msg];
+  // update parent conversation snippet & timestamp
+  const conv = liveConversations.find((c) => c.id === msg.conversationId);
+  if (conv) {
+    conv.lastMessageSnippet = msg.content;
+    conv.lastUpdated = msg.timestamp;
+  }
+  return msg;
+}
+
+export function resetConciergeState(): void {
+  liveConciergeRequests = [...sampleConciergeRequests];
+  liveConversations = [...sampleConversations];
+  liveMessages = [...sampleMessages];
+  conciergeRefSeq = 45;
+}
 
 export const sampleStaffAssignments: StaffAssignment[] = [
   {

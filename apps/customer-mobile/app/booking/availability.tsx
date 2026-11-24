@@ -11,7 +11,6 @@ import { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Local committed assets matching Figma node 49:623
 const logoHeader = require('../../assets/logo.png');
 
 const DAYS_OF_WEEK = [
@@ -45,35 +44,43 @@ export default function AvailabilitySelectionScreen() {
     currency?: string;
   }>();
 
-  const draft = useMemo(() => getBookingDraft(), []);
+  const draft = getBookingDraft();
   const activeServiceId = params.serviceId || draft.serviceId || 'svc-airport-fasttrack';
+
   const service = useMemo(() => {
     return sampleServices.find((s) => s.id === activeServiceId) || sampleServices[0];
   }, [activeServiceId]);
 
-  // Selected calendar day (1..31) - default 5th (e.g. 2026-12-05)
+  // Dynamic calendar dates based on current calendar date
+  const now = useMemo(() => new Date(), []);
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentDay = now.getDate();
+  const daysInCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+
   const [selectedDay, setSelectedDay] = useState<number>(() => {
     if (params.date) {
       const parts = params.date.split('-');
       const d = Number.parseInt(parts[parts.length - 1], 10);
       if (!Number.isNaN(d) && d >= 1 && d <= 31) return d;
     }
-    return 5;
+    // Default to at least currentDay or tomorrow
+    return Math.min(currentDay + 1, daysInCurrentMonth);
   });
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(params.time || '14:30 GMT');
 
   const passengerCount = params.passengers || params.quantity || String(draft.passengers || 2);
-  const minSelectableDay = 4; // Past dates (days 1-3) cannot be booked
 
   const formattedSelectedDate = useMemo(() => {
+    const monthStr = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
     const dayStr = selectedDay < 10 ? `0${selectedDay}` : `${selectedDay}`;
-    return `2026-12-${dayStr}`;
-  }, [selectedDay]);
+    return `${currentYear}-${monthStr}-${dayStr}`;
+  }, [selectedDay, currentYear, currentMonth]);
 
   const handleContinue = () => {
-    if (selectedDay < minSelectableDay) {
-      return;
+    if (selectedDay < currentDay) {
+      return; // Prevent past date booking
     }
     const scheduleStr = `${formattedSelectedDate} • ${selectedTimeSlot}`;
 
@@ -121,14 +128,14 @@ export default function AvailabilitySelectionScreen() {
     }
   };
 
-  // Generate 28-day calendar grid (4 weeks of 7 days)
+  // Generate calendar days (28-day Figma grid representation)
   const calendarDays = useMemo(() => {
     const days: number[] = [];
-    for (let i = 1; i <= 28; i++) {
+    for (let i = 1; i <= Math.min(28, daysInCurrentMonth); i++) {
       days.push(i);
     }
     return days;
-  }, []);
+  }, [daysInCurrentMonth]);
 
   return (
     <View style={styles.screen}>
@@ -181,7 +188,7 @@ export default function AvailabilitySelectionScreen() {
           {/* Days Grid */}
           <View style={styles.calendarGrid}>
             {calendarDays.map((d) => {
-              const isPast = d < minSelectableDay;
+              const isPast = d < currentDay;
               const isSelected = selectedDay === d;
               return (
                 <Pressable
@@ -194,7 +201,7 @@ export default function AvailabilitySelectionScreen() {
                   onPress={() => !isPast && setSelectedDay(d)}
                   disabled={isPast}
                   accessibilityRole="button"
-                  accessibilityLabel={`Select December ${d}`}
+                  accessibilityLabel={`Select Day ${d}`}
                   accessibilityState={{ selected: isSelected, disabled: isPast }}
                 >
                   <Text
@@ -212,7 +219,7 @@ export default function AvailabilitySelectionScreen() {
           </View>
         </View>
 
-        {/* Time Slots Section */}
+        {/* Available Time Slots Section */}
         <View style={styles.timeSection}>
           <Text style={styles.timeSectionTitle}>Available slots for {formattedSelectedDate}</Text>
           <View style={styles.timeSlotRow}>
@@ -333,89 +340,81 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    height: 45,
+    height: 44,
   },
   logoWrap: {
-    width: 82,
-    height: 35,
-    justifyContent: 'center',
+    flex: 1,
     alignItems: 'center',
   },
   brandLogo: {
-    width: 82,
-    height: 35,
+    width: 140,
+    height: 32,
   },
   headerSpacer: {
-    width: 40,
-    height: 40,
+    width: 44,
   },
   divider: {
     height: 1,
     backgroundColor: '#DDD8CF',
+    opacity: 0.72,
     marginHorizontal: 20,
-    marginTop: 4,
+    marginTop: 6,
+    marginBottom: 10,
   },
   titleRow: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 12,
+    marginTop: 6,
+    marginBottom: 10,
   },
   pageTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: '#0B0C0E',
-    lineHeight: 32,
+    letterSpacing: -0.3,
   },
   warningBanner: {
     marginHorizontal: 20,
-    backgroundColor: '#F7EFD9',
+    backgroundColor: '#FAF6EF',
     borderWidth: 1,
-    borderColor: '#8A5610',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 2,
+    borderColor: '#E4D7B5',
+    borderRadius: 14,
+    padding: 14,
+    gap: 4,
   },
   warningTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#8A5610',
-    lineHeight: 20,
-    letterSpacing: 0.1,
+    color: '#8A6A2B',
   },
   warningSubtitle: {
     fontSize: 12,
     fontWeight: '500',
     color: '#5B616B',
     lineHeight: 16,
-    letterSpacing: 0.1,
   },
   sectionHeading: {
     marginHorizontal: 20,
-    marginTop: 16,
+    marginTop: 18,
     fontSize: 18,
     fontWeight: '600',
     color: '#0B0C0E',
-    lineHeight: 26,
   },
   calendarCard: {
     marginHorizontal: 20,
-    marginTop: 8,
+    marginTop: 12,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#DDD8CF',
-    borderRadius: 14,
-    padding: 12,
-    gap: 8,
+    borderRadius: 12,
+    padding: 14,
+    gap: 12,
   },
   daysHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 6,
-    paddingBottom: 4,
   },
   dayHeaderText: {
-    width: 34,
+    width: '13%',
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '500',
@@ -543,8 +542,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   cancelLink: {
+    marginTop: 14,
+    marginBottom: 10,
     alignItems: 'center',
-    paddingVertical: 10,
+    justifyContent: 'center',
   },
   cancelLinkText: {
     fontSize: 13,
@@ -552,7 +553,6 @@ const styles = StyleSheet.create({
     color: '#164D53',
     letterSpacing: 0.15,
   },
-  // Bottom Navigation
   bottomNav: {
     position: 'absolute',
     bottom: 0,
@@ -565,26 +565,26 @@ const styles = StyleSheet.create({
   bottomNavRow: {
     flexDirection: 'row',
     height: 60,
-    justifyContent: 'space-around',
-    alignItems: 'center',
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 4,
+    paddingTop: 6,
+    position: 'relative',
   },
   navText: {
     fontSize: 11,
     fontWeight: '500',
     color: '#5B616B',
-    marginTop: 3,
+    marginTop: 2,
   },
   activeUnderline: {
+    position: 'absolute',
+    bottom: 4,
     width: 20,
     height: 2,
+    borderRadius: 1,
     backgroundColor: '#C6A15B',
-    borderRadius: 999,
-    marginTop: 3,
   },
 });

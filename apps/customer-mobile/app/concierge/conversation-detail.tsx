@@ -1,80 +1,312 @@
-import { sampleMessages } from '@xtreme/mock-data';
-import { Header, palette, ScreenContainer } from '@xtreme/ui';
+import { addMessage, getMessagesByConversationId } from '@xtreme/mock-data';
+import type { ConciergeMessage } from '@xtreme/types';
+import { CustomerBottomNav } from '@xtreme/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
-/** CUS-CON-05 — Concierge Conversation Detail. Preserves conversationId and displays dialogue thread. */
-export default function Screen() {
+/**
+ * CUS-CON-05: Concierge Conversation Detail Screen
+ * Authoritative Figma Frame: 60:1091 (CUS-CON-05__Concierge_Conversation_Detail__Ready)
+ */
+export default function ConciergeConversationDetailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id?: string; conversationId?: string }>();
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{
+    conversationId?: string;
+    id?: string;
+    requestId?: string;
+  }>();
+
   const activeConvId = params.conversationId || params.id || 'conv-demo-001';
 
-  return (
-    <ScreenContainer>
-      <Header
-        eyebrow="CONCIERGE CONVERSATION"
-        title="Concierge Dialogue"
-        subtitle={`Conversation ID: ${activeConvId}`}
-        onBack={() => router.back()}
-      />
+  const [messages, setMessages] = useState<ConciergeMessage[]>([]);
+  const [inputText, setInputText] = useState('');
 
-      <View style={styles.threadContainer}>
-        {sampleMessages.map((msg) => (
-          <View
-            key={msg.id}
-            style={[styles.bubble, msg.isStaff ? styles.bubbleStaff : styles.bubbleUser]}
-          >
-            <Text style={styles.sender}>{msg.senderName}</Text>
-            <Text style={[styles.content, msg.isStaff ? styles.contentStaff : styles.contentUser]}>
-              {msg.content}
-            </Text>
-            <Text style={styles.time}>{msg.timestamp.slice(11, 16)} GMT</Text>
+  // Load live messages for this conversation
+  useEffect(() => {
+    setMessages(getMessagesByConversationId(activeConvId));
+  }, [activeConvId]);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/concierge/conversations' as never);
+    }
+  };
+
+  const handleSendMessage = () => {
+    const trimmed = inputText.trim();
+    if (!trimmed) return;
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(
+      2,
+      '0',
+    )}`;
+
+    const newMsg: ConciergeMessage = {
+      id: `msg-${Date.now()}`,
+      conversationId: activeConvId,
+      senderId: 'demo-cus-001',
+      senderName: 'You',
+      isStaff: false,
+      content: trimmed,
+      timestamp: timeStr,
+    };
+
+    addMessage(newMsg);
+    setMessages(getMessagesByConversationId(activeConvId));
+    setInputText('');
+  };
+
+  return (
+    <View style={styles.screen}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 90 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Top Header Row with back chevron */}
+          <View style={styles.headerRow}>
+            <Pressable
+              style={styles.backButton}
+              onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M15 19L8 12L15 5"
+                  stroke="#164D53"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
+            <View style={styles.headerSpacer} />
           </View>
-        ))}
-      </View>
-    </ScreenContainer>
+
+          {/* Title matching Figma node 60:1095 */}
+          <View style={styles.titleWrap}>
+            <Text style={styles.pageTitle}>Concierge Conversation Detail</Text>
+            <Text style={styles.pageSubtitle}>Concierge Conversation</Text>
+          </View>
+
+          {/* Dialogue Thread matching Figma frame 60:1091 */}
+          <View style={styles.threadContainer}>
+            {messages.map((msg) => {
+              const isCustomer = !msg.isStaff;
+              return (
+                <View
+                  key={msg.id}
+                  style={[
+                    styles.messageBubble,
+                    isCustomer ? styles.bubbleCustomer : styles.bubbleConcierge,
+                  ]}
+                >
+                  <Text style={styles.messageText}>{msg.content}</Text>
+                  <Text
+                    style={[
+                      styles.messageMeta,
+                      isCustomer ? styles.metaCustomer : styles.metaConcierge,
+                    ]}
+                  >
+                    {isCustomer ? `${msg.timestamp} • You` : `${msg.timestamp} • Concierge`}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Message Input Composer matching Figma node 60:1112 */}
+          <View style={styles.composerCard}>
+            <TextInput
+              style={styles.composerInput}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Write a message"
+              placeholderTextColor="#5B616B"
+              returnKeyType="send"
+              onSubmitEditing={handleSendMessage}
+            />
+            <Pressable
+              style={styles.sendButton}
+              onPress={handleSendMessage}
+              accessibilityRole="button"
+              accessibilityLabel="Send message"
+            >
+              <Text style={styles.sendButtonText}>Send</Text>
+            </Pressable>
+          </View>
+
+          {/* Persistence Notice matching Figma node 60:1116 */}
+          <Text style={styles.persistenceNotice}>
+            Messages persist with sender, timestamp and read state.
+          </Text>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Bottom Navigation */}
+      <CustomerBottomNav
+        activeTab="Concierge"
+        bottomInset={insets.bottom}
+        onTabPress={(tab) => {
+          if (tab === 'Home') router.push('/discover' as never);
+          else if (tab === 'Bookings') router.push('/bookings' as never);
+          else if (tab === 'Trips') router.push('/trips' as never);
+          else if (tab === 'Concierge') router.push('/concierge/requests' as never);
+          else if (tab === 'Profile') router.push('/account/profile' as never);
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  threadContainer: {
+  screen: {
+    flex: 1,
+    backgroundColor: '#FAF8F4',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    height: 45,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerSpacer: {
+    width: 40,
+    height: 40,
+  },
+  titleWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
     gap: 12,
   },
-  bubble: {
-    padding: 14,
-    borderRadius: 14,
-    maxWidth: '85%',
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0B0C0E',
+    lineHeight: 32,
   },
-  bubbleStaff: {
+  pageSubtitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0B0C0E',
+    lineHeight: 26,
+  },
+  threadContainer: {
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 16,
+  },
+  messageBubble: {
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    maxWidth: '82%',
+    gap: 4,
+  },
+  bubbleConcierge: {
     alignSelf: 'flex-start',
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: palette.line,
   },
-  bubbleUser: {
+  bubbleCustomer: {
     alignSelf: 'flex-end',
-    backgroundColor: palette.ink,
+    backgroundColor: '#F1E7D2',
   },
-  sender: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: palette.accent,
-    marginBottom: 4,
-  },
-  content: {
+  messageText: {
     fontSize: 14,
-    lineHeight: 20,
+    fontWeight: '400',
+    color: '#0B0C0E',
+    lineHeight: 22,
   },
-  contentStaff: {
-    color: palette.ink,
+  messageMeta: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#5B616B',
+    letterSpacing: 0.1,
   },
-  contentUser: {
+  metaConcierge: {
+    textAlign: 'left',
+  },
+  metaCustomer: {
+    textAlign: 'right',
+  },
+  composerCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDD8CF',
+    borderRadius: 12,
+    height: 54,
+    paddingLeft: 12,
+    paddingRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  composerInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#0B0C0E',
+    marginRight: 8,
+  },
+  sendButton: {
+    backgroundColor: '#0B0C0E',
+    borderRadius: 12,
+    height: 38,
+    width: 72,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#FFFFFF',
+    letterSpacing: 0.1,
   },
-  time: {
-    fontSize: 11,
-    color: palette.muted,
-    marginTop: 6,
-    alignSelf: 'flex-end',
+  persistenceNotice: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#5B616B',
+    textAlign: 'center',
+    letterSpacing: 0.1,
+    marginTop: 12,
+    marginBottom: 8,
+    paddingHorizontal: 20,
   },
 });

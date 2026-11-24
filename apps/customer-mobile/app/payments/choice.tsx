@@ -1,4 +1,9 @@
-import { getAllBookings, getBookingById, updateBookingDraft } from '@xtreme/mock-data';
+import {
+  convertFromBaseXof,
+  getAllBookings,
+  getBookingById,
+  updateBookingDraft,
+} from '@xtreme/mock-data';
 import type { BookingRecord, CurrencyCode, PaymentPurpose } from '@xtreme/types';
 import {
   BackButton,
@@ -18,8 +23,8 @@ const logoHeader = require('../../assets/logo.png');
 
 const CURRENCY_OPTIONS: { code: CurrencyCode; label: string }[] = [
   { code: 'XOF', label: 'XOF - West African CFA (Base)' },
-  { code: 'EUR', label: 'EUR - Euro (€ Reference)' },
-  { code: 'USD', label: 'USD - US Dollar ($ Reference)' },
+  { code: 'EUR', label: 'EUR - Euro (€ Reference @ 655.957)' },
+  { code: 'USD', label: 'USD - US Dollar ($ Reference @ 610.0)' },
 ];
 
 /**
@@ -52,25 +57,33 @@ export default function PaymentChoiceScreen() {
   );
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
 
-  // Compute calculated amounts dynamically
-  const totalAmount = booking?.amount || 95000;
-  const depositAmount = Math.round(totalAmount * 0.5);
-  const balanceAmount = totalAmount - depositAmount;
+  // Compute calculated base amounts in XOF
+  const baseTotalAmountXof = booking?.amount || 95000;
+  const depositAmountXof = Math.round(baseTotalAmountXof * 0.5);
+  const balanceAmountXof = baseTotalAmountXof - depositAmountXof;
 
-  const activeChargeAmount = useMemo(() => {
-    if (selectedPurpose === 'DEPOSIT') return depositAmount;
-    if (selectedPurpose === 'BALANCE') return balanceAmount;
-    return totalAmount;
-  }, [selectedPurpose, totalAmount, depositAmount, balanceAmount]);
+  const activeBaseChargeXof = useMemo(() => {
+    if (selectedPurpose === 'DEPOSIT') return depositAmountXof;
+    if (selectedPurpose === 'BALANCE') return balanceAmountXof;
+    return baseTotalAmountXof;
+  }, [selectedPurpose, baseTotalAmountXof, depositAmountXof, balanceAmountXof]);
+
+  const {
+    amount: convertedAmount,
+    rate,
+    isConverted,
+  } = useMemo(() => {
+    return convertFromBaseXof(activeBaseChargeXof, selectedCurrency);
+  }, [activeBaseChargeXof, selectedCurrency]);
 
   const handleContinue = () => {
     if (!booking) return;
 
     updateBookingDraft({
       id: booking.id,
-      amount: totalAmount,
-      depositAmount,
-      remainingBalance: balanceAmount,
+      amount: convertedAmount,
+      depositAmount: Math.round(convertedAmount * 0.5),
+      remainingBalance: Math.round(convertedAmount * 0.5),
       currency: selectedCurrency,
       paymentStatus: 'PENDING',
     });
@@ -83,8 +96,8 @@ export default function PaymentChoiceScreen() {
         serviceName: booking.serviceName,
         purpose: selectedPurpose,
         currency: selectedCurrency,
-        amount: String(activeChargeAmount),
-        totalAmount: String(totalAmount),
+        amount: String(convertedAmount),
+        baseAmountXof: String(activeBaseChargeXof),
       },
     } as never);
   };
@@ -149,9 +162,13 @@ export default function PaymentChoiceScreen() {
         <View style={styles.amountCard}>
           <Text style={styles.amountLabel}>Amount due</Text>
           <Text style={styles.amountValue}>
-            {activeChargeAmount.toLocaleString()} {selectedCurrency}
+            {convertedAmount.toLocaleString()} {selectedCurrency}
           </Text>
-          <Text style={styles.amountSubtitle}>XOF base • USD / EUR reference when applicable</Text>
+          <Text style={styles.amountSubtitle}>
+            {isConverted
+              ? `Base: ${activeBaseChargeXof.toLocaleString()} XOF • Ref rate: 1 ${selectedCurrency} = ${rate} XOF`
+              : 'XOF base • USD / EUR reference when applicable'}
+          </Text>
         </View>
 
         {/* Section: Payment Purpose matching Figma 52:795 */}

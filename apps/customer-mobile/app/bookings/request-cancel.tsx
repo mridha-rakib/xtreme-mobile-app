@@ -64,20 +64,18 @@ export default function RequestCancelScreen() {
       id: `can-${Date.now()}`,
       bookingId: booking.id,
       reason: reason.trim() || undefined,
-      status: 'APPROVED' as const, // For demo purposes, marks as cancelled
+      status: 'PENDING' as const,
       createdAt: new Date().toISOString(),
     };
 
-    // Update authoritative booking record to CANCELLED in live repository
+    // Update authoritative booking record: keep operational status active while request is PENDING
     updateBooking(booking.id, {
-      status: 'CANCELLED',
       cancellationRequest: cancelRecord,
     });
 
     // Update shared draft
     updateBookingDraft({
       id: booking.id,
-      status: 'CANCELLED',
     });
 
     setTimeout(() => {
@@ -165,10 +163,11 @@ export default function RequestCancelScreen() {
             <View style={styles.successIconCircle}>
               <Text style={styles.successIconText}>✓</Text>
             </View>
-            <Text style={styles.successTitle}>Cancellation Processed</Text>
+            <Text style={styles.successTitle}>Cancellation Request Submitted</Text>
             <Text style={styles.successSubtitle}>
-              Your booking {booking.reference} has been marked as cancelled. Any applicable refund
-              will be processed independently according to our cancellation terms.
+              Your cancellation request for {booking.reference} has been submitted with PENDING
+              status. The authoritative booking remains active until authorized resolution by XTREME
+              Concierge operations.
             </Text>
             <Pressable
               style={styles.primaryBtn}

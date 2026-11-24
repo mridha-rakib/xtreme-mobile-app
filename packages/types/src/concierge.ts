@@ -3,6 +3,10 @@
  */
 
 export type ConciergeRequestStatus =
+  | 'OPEN'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
   | 'SUBMITTED'
   | 'IN_REVIEW'
   | 'PROPOSAL_READY'
@@ -14,13 +18,18 @@ export interface ConciergeRequestRecord {
   reference: string;
   customerId: string;
   title: string;
+  type?: string;
   details: string;
+  tripContext?: string;
+  serviceContext?: string;
   startDate?: string;
   endDate?: string;
   guestCount?: number;
   budgetNotes?: string;
   status: ConciergeRequestStatus;
   createdAt: string;
+  updatedAt?: string;
+  conversationId?: string;
 }
 
 export interface ConciergeMessage {
@@ -40,4 +49,5 @@ export interface ConciergeConversation {
   lastMessageSnippet: string;
   lastUpdated: string;
   unreadCount: number;
+  status?: 'NEW' | 'READ';
 }

@@ -194,6 +194,19 @@ export function NavProfileIcon({ active = false, size = 24 }: { active?: boolean
 }
 
 /**
+ * Figma 849:6938;805:641 - NavIcon/Trips
+ */
+export function NavTripsIcon({ active = false, size = 24 }: { active?: boolean; size?: number }) {
+  const color = active ? '#164D53' : '#5B616B';
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x={3} y={7} width={18} height={14} rx={3} stroke={color} strokeWidth={1.5} />
+      <Rect x={8} y={3} width={8} height={5} rx={2} stroke={color} strokeWidth={1.5} />
+    </Svg>
+  );
+}
+
+/**
  * Category Circular Badge Vector Icons (16x16 on 32x32 circular badge)
  */
 export function CategoryBadgeIcon({

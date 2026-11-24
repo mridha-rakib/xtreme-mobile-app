@@ -1,4 +1,4 @@
-import { getAllBookings, getBookingById } from '@xtreme/mock-data';
+import { getBookingById } from '@xtreme/mock-data';
 import type { BookingRecord, CurrencyCode, PaymentPurpose, PaymentStatus } from '@xtreme/types';
 import {
   BackButton,
@@ -38,10 +38,11 @@ export default function PaymentStatusScreen() {
     if (activeBookingId) {
       return getBookingById(activeBookingId);
     }
-    return getAllBookings()[0];
+    return undefined; // Never assume default success on unknown/missing transaction
   });
 
-  const paymentStatus: PaymentStatus = params.status || booking?.paymentStatus || 'SUCCEEDED';
+  // Treat live booking record as authoritative frontend truth, fallback to params only if booking has no paymentStatus
+  const paymentStatus: PaymentStatus = booking?.paymentStatus || params.status || 'PENDING';
   const purpose: PaymentPurpose = params.purpose || booking?.paymentPurpose || 'FULL';
   const currency: CurrencyCode = params.currency || booking?.currency || 'XOF';
   const displayAmount = params.amount
@@ -91,7 +92,7 @@ export default function PaymentStatusScreen() {
           </View>
           <View style={styles.divider} />
           <NotFoundCard
-            resourceName="Booking"
+            resourceName="Payment Transaction"
             resourceId={activeBookingId}
             onBack={() => router.replace('/bookings' as never)}
           />

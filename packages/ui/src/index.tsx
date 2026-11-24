@@ -2,6 +2,7 @@ import { colors, palette, radii, shadows, spacing, typography } from '@xtreme/de
 import {
   DEFAULT_DEMO_IDS,
   resetBookings,
+  resetConciergeState,
   sampleCustomer,
   sampleDriver,
   sampleOperationsUser,
@@ -10,6 +11,7 @@ import {
 import type {
   AssignmentStatus,
   BookingStatus,
+  ConciergeRequestStatus,
   DemoPersona,
   DemoScenario,
   UserProfile,
@@ -35,6 +37,15 @@ import Svg, { Path } from 'react-native-svg';
 const logoAsset = require('./assets/logo.png');
 
 export * from './discovery-icons';
+
+import {
+  NavBookingsIcon,
+  NavConciergeIcon,
+  NavHomeIcon,
+  NavProfileIcon,
+  NavTripsIcon,
+} from './discovery-icons';
+
 // Re-export design tokens for consumer convenience
 export { colors, palette, radii, shadows, spacing, typography };
 
@@ -142,6 +153,7 @@ export function MockAuthProvider({
     setActivePersona('customer');
     setScenarioState('success');
     resetBookings();
+    resetConciergeState();
     if (isDemoPermitted) {
       setIsDemoModeState(true);
     }
@@ -559,6 +571,222 @@ export function BookingStatusPill({
       >
         {label}
       </Text>
+    </View>
+  );
+}
+
+/**
+ * ConciergeStatusPill Component - Faithful reproduction of Figma Node 20:231 (Status/Concierge Request)
+ * Renders the exact 6x6 tone marker dot + rounded-full pill + status label.
+ */
+export function ConciergeStatusPill({
+  status,
+  style,
+}: {
+  status: ConciergeRequestStatus | string;
+  style?: ViewStyle;
+}) {
+  let bg = '#EEE9E0';
+  let dot = '#0B0C0E';
+  let text = '#0B0C0E';
+  let label = status.replace(/_/g, ' ');
+
+  switch (status) {
+    case 'OPEN':
+    case 'SUBMITTED':
+      bg = '#E8F0F8';
+      dot = '#2F5E8D';
+      text = '#2F5E8D';
+      label = 'OPEN';
+      break;
+    case 'IN_PROGRESS':
+    case 'IN PROGRESS':
+    case 'IN_REVIEW':
+    case 'PROPOSAL_READY':
+      bg = '#DDEBEC';
+      dot = '#164D53';
+      text = '#164D53';
+      label = 'IN PROGRESS';
+      break;
+    case 'COMPLETED':
+    case 'ACCEPTED':
+      bg = '#E6F2EC';
+      dot = '#1F6B4A';
+      text = '#1F6B4A';
+      label = 'COMPLETED';
+      break;
+    case 'CANCELLED':
+    case 'DECLINED':
+      bg = '#EEE9E0';
+      dot = '#0B0C0E';
+      text = '#0B0C0E';
+      label = 'CANCELLED';
+      break;
+  }
+
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: bg,
+          borderRadius: 999,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+          alignSelf: 'flex-start',
+        },
+        style,
+      ]}
+    >
+      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dot }} />
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: '600',
+          color: text,
+          letterSpacing: 0.15,
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * ConversationReadPill Component - Faithful reproduction of Figma Node 60:1051 (NEW / READ pill)
+ */
+export function ConversationReadPill({
+  status,
+  style,
+}: {
+  status: 'NEW' | 'READ' | string;
+  style?: ViewStyle;
+}) {
+  const isNew = status === 'NEW';
+  return (
+    <View
+      style={[
+        {
+          backgroundColor: isNew ? '#E8F0F8' : '#EEE9E0',
+          borderRadius: 999,
+          paddingHorizontal: 9,
+          paddingVertical: 4,
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 50,
+        },
+        style,
+      ]}
+    >
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '500',
+          color: isNew ? '#2F5E8D' : '#5B616B',
+          letterSpacing: 0.1,
+          textAlign: 'center',
+        }}
+      >
+        {isNew ? 'NEW' : 'READ'}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * CustomerBottomNav Component - Faithful reproduction of Figma Node 849:6806 / 849:6938
+ */
+export type CustomerNavTab = 'Home' | 'Bookings' | 'Trips' | 'Concierge' | 'Profile';
+
+export function CustomerBottomNav({
+  activeTab = 'Concierge',
+  onTabPress,
+  bottomInset = 0,
+}: {
+  activeTab?: CustomerNavTab;
+  onTabPress?: (tab: CustomerNavTab) => void;
+  bottomInset?: number;
+}) {
+  const tabs: Array<{ id: CustomerNavTab; label: string; icon: (active: boolean) => ReactNode }> = [
+    { id: 'Home', label: 'Home', icon: (act) => <NavHomeIcon active={act} size={24} /> },
+    {
+      id: 'Bookings',
+      label: 'Bookings',
+      icon: (act) => <NavBookingsIcon active={act} size={24} />,
+    },
+    { id: 'Trips', label: 'Trips', icon: (act) => <NavTripsIcon active={act} size={24} /> },
+    {
+      id: 'Concierge',
+      label: 'Concierge',
+      icon: (act) => <NavConciergeIcon active={act} size={24} />,
+    },
+    { id: 'Profile', label: 'Profile', icon: (act) => <NavProfileIcon active={act} size={24} /> },
+  ];
+
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#FFFFFF',
+        borderTopWidth: 1,
+        borderTopColor: '#DDD8CF',
+        paddingBottom: Math.max(bottomInset, 4),
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          height: 60,
+          justifyContent: 'space-around',
+          alignItems: 'center',
+        }}
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 4,
+              }}
+              onPress={() => onTabPress?.(tab.id)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`${tab.label} tab`}
+            >
+              {tab.icon(isActive)}
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontWeight: '500',
+                  color: isActive ? '#164D53' : '#5B616B',
+                  marginTop: 3,
+                }}
+              >
+                {tab.label}
+              </Text>
+              <View
+                style={{
+                  width: 20,
+                  height: 2,
+                  backgroundColor: isActive ? '#C6A15B' : 'transparent',
+                  borderRadius: 999,
+                  marginTop: 3,
+                }}
+              />
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
